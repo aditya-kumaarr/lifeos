@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
 <title>LifeOS — Build Dashboard</title>
 <style>
 :root {
@@ -954,11 +957,24 @@ async function init() {
     try {
       const remote = await fetchRemoteState();
       if (remote) {
-        // Remote wins on load — it represents the authoritative state across machines
-        state = Object.assign({ completed: {}, collapsed: {}, activeTodo: null }, remote);
-        persistLocal();
-        renderTodos('');
-        renderDetail(state.activeTodo);
+        // Smart merge: whichever side has the newer updatedAt wins.
+        // This preserves local changes that didn't yet sync (e.g. user ticked while offline)
+        // and respects remote changes from other machines.
+        const localT = state.updatedAt ? new Date(state.updatedAt).getTime() : 0;
+        const remoteT = remote.updatedAt ? new Date(remote.updatedAt).getTime() : 0;
+        if (localT > remoteT + 1000) {
+          // Local is meaningfully newer — push to remote
+          await pushRemoteState();
+        } else {
+          // Remote is newer (or equal) — accept it, but keep the local activeTodo
+          // because that's UI state for this tab, not shared progress.
+          const keepActive = state.activeTodo;
+          state = Object.assign({ completed: {}, collapsed: {}, activeTodo: keepActive }, remote);
+          state.activeTodo = keepActive;
+          persistLocal();
+          renderTodos(document.getElementById('search') ? document.getElementById('search').value : '');
+          renderDetail(state.activeTodo);
+        }
       } else {
         // File doesn't exist on GitHub yet — push current local state
         await pushRemoteState();
@@ -976,6 +992,52 @@ async function init() {
   // Mark init complete so scheduleSync is free to fire. Anything queued during
   // init will now drain naturally on the next user interaction.
   isInitialized = true;
+
+  // Start auto-refresh so changes from another tab/machine appear here within ~30s.
+  startAutoRefresh();
+}
+
+// =====================================================================
+// AUTO-REFRESH — pulls fresh state from GitHub periodically and on tab focus.
+// Lets a second tab / second machine see progress made elsewhere without a
+// hard refresh from the user.
+// =====================================================================
+let autoRefreshTimer = null;
+
+async function pullFreshState(silent) {
+  if (!isConfigured() || isSyncing) return;
+  if (saveTimer) return; // user has unsaved local changes — don't clobber
+  try {
+    const remote = await fetchRemoteState();
+    if (!remote) return;
+    const localT = state.updatedAt ? new Date(state.updatedAt).getTime() : 0;
+    const remoteT = remote.updatedAt ? new Date(remote.updatedAt).getTime() : 0;
+    if (remoteT > localT) {
+      const keepActive = state.activeTodo;
+      state = Object.assign({ completed: {}, collapsed: {}, activeTodo: keepActive }, remote);
+      state.activeTodo = keepActive;
+      persistLocal();
+      renderTodos(document.getElementById('search') ? document.getElementById('search').value : '');
+      renderDetail(state.activeTodo);
+      lastSyncedAt = new Date();
+      setSyncStatus('synced', `Synced ${formatTimeAgo(lastSyncedAt)}`);
+      if (!silent) showToast('Picked up changes from another tab');
+    }
+  } catch (e) {
+    // Silent — periodic poll shouldn't pollute the UI with errors.
+  }
+}
+
+function startAutoRefresh() {
+  if (autoRefreshTimer) clearInterval(autoRefreshTimer);
+  // Poll every 30s while the tab is open.
+  autoRefreshTimer = setInterval(() => pullFreshState(true), 30000);
+  // Also refresh immediately when the tab becomes visible (switching back to it).
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') pullFreshState(false);
+  });
+  // And on window focus, as a backup for browsers that handle visibility differently.
+  window.addEventListener('focus', () => pullFreshState(true));
 }
 
 init();
