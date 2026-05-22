@@ -429,6 +429,7 @@ let stateSha = null; // SHA of the current state file on GitHub
 let saveTimer = null;
 let isSyncing = false;
 let lastSyncedAt = null;
+let isInitialized = false; // becomes true after init() finishes; prevents race-condition writes
 
 function loadLocalState() {
   try {
@@ -464,7 +465,10 @@ async function ghRequest(path, opts = {}) {
     'Accept': 'application/vnd.github+json',
     'X-GitHub-Api-Version': '2022-11-28',
   }, opts.headers || {});
-  const res = await fetch(url, Object.assign({ headers }, opts));
+  // IMPORTANT: spread opts FIRST, then overwrite headers — otherwise opts.headers
+  // would shadow the merged Authorization header for PUT requests.
+  const fetchOpts = Object.assign({}, opts, { headers });
+  const res = await fetch(url, fetchOpts);
   return res;
 }
 
@@ -500,27 +504,17 @@ async function pushRemoteState() {
     branch: cfg.branch,
   };
   if (stateSha) body.sha = stateSha;
-  const res = await ghRequest(path, {
+  const doPut = () => ghRequest(path, {
     method: 'PUT',
     body: JSON.stringify(body),
     headers: { 'Content-Type': 'application/json' },
   });
-  if (res.status === 409) {
-    // SHA mismatch — someone else updated. Refetch and retry once.
-    await fetchRemoteState(); // updates stateSha
+  let res = await doPut();
+  // 409 = SHA conflict; 422 = file exists and we omitted SHA. Both need a fresh fetch + retry.
+  if (res.status === 409 || res.status === 422) {
+    await fetchRemoteState();
     body.sha = stateSha;
-    const retry = await ghRequest(path, {
-      method: 'PUT',
-      body: JSON.stringify(body),
-      headers: { 'Content-Type': 'application/json' },
-    });
-    if (!retry.ok) {
-      const err = await retry.json().catch(() => ({}));
-      throw new Error(`GitHub ${retry.status}: ${err.message || 'push failed'}`);
-    }
-    const data = await retry.json();
-    stateSha = data.content.sha;
-    return;
+    res = await doPut();
   }
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
@@ -552,6 +546,13 @@ async function syncToRemote() {
 
 function scheduleSync() {
   if (!isConfigured()) return;
+  // If init hasn't finished yet (i.e. stateSha not fetched), delay until it has — otherwise
+  // we'd attempt a PUT without the current SHA and GitHub would reject it.
+  if (!isInitialized) {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(scheduleSync, 400);
+    return;
+  }
   clearTimeout(saveTimer);
   setSyncStatus('syncing', 'Saving…');
   saveTimer = setTimeout(() => { syncToRemote(); }, 1500);
@@ -972,6 +973,9 @@ async function init() {
   } else {
     setSyncStatus('offline', 'Not connected');
   }
+  // Mark init complete so scheduleSync is free to fire. Anything queued during
+  // init will now drain naturally on the next user interaction.
+  isInitialized = true;
 }
 
 init();
