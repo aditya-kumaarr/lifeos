@@ -423,7 +423,8 @@ const CFG_KEY = 'lifeos-dashboard-cfg-v1';
 const STATE_PATH = 'state/dashboard-state.json';
 
 let state = { completed: {}, collapsed: {}, activeTodo: null, updatedAt: null };
-let cfg = { owner: '', repo: 'lifeos', branch: 'main', pat: '' };
+// Defaults pre-filled for this repo so the user only ever needs the PAT.
+let cfg = { owner: 'aditya-kumaarr', repo: 'lifeos', branch: 'main', pat: '' };
 let stateSha = null; // SHA of the current state file on GitHub
 let saveTimer = null;
 let isSyncing = false;
@@ -925,6 +926,25 @@ document.getElementById('cfg-save').addEventListener('click', async () => {
 async function init() {
   loadCfg();
   loadLocalState();
+
+  // One-click setup via URL fragment: dashboard/#setup=<PAT>
+  // Used the first time the user opens the dashboard from a magic link;
+  // immediately writes PAT to localStorage, cleans the URL, and proceeds.
+  const hash = window.location.hash || '';
+  if (hash.startsWith('#setup=')) {
+    const token = decodeURIComponent(hash.substring(7)).trim();
+    if (token && token.length > 10) {
+      cfg.owner = cfg.owner || 'aditya-kumaarr';
+      cfg.repo = cfg.repo || 'lifeos';
+      cfg.branch = cfg.branch || 'main';
+      cfg.pat = token;
+      persistCfg();
+      // Strip the token out of the URL so it doesn't linger in history.
+      try { history.replaceState(null, '', window.location.pathname); } catch (e) {}
+      showToast('GitHub sync configured. Connecting…');
+    }
+  }
+
   renderTodos('');
   renderDetail(state.activeTodo);
 
