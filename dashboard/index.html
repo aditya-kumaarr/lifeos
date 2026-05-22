@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>LifeOS — Build Dashboard</title>
+<style>
+:root {
+  color-scheme: light;
+  --bg: #fafaf9;
+  --panel: #ffffff;
+  --border: #e7e5e4;
+  --border-strong: #d6d3d1;
+  --text: #1c1917;
+  --text-muted: #78716c;
+  --text-faint: #a8a29e;
+  --accent: #1e40af;
+  --accent-soft: #eff6ff;
+  --accent-border: #bfdbfe;
+  --success: #047857;
+  --success-soft: #ecfdf5;
+  --warn: #b45309;
+  --warn-soft: #fef3c7;
+  --error: #b91c1c;
+  --error-soft: #fee2e2;
+  --shadow: 0 1px 2px rgba(0,0,0,.04), 0 1px 1px rgba(0,0,0,.03);
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; height: 100%; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Helvetica, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+.app { display: flex; flex-direction: column; height: 100vh; }
+header.top {
+  padding: 18px 22px 14px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+}
+.top-row { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+h1 { margin: 0; font-size: 18px; font-weight: 600; letter-spacing: -0.01em; }
+.subtitle { color: var(--text-muted); font-size: 13px; margin-top: 2px; }
+.header-right { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.sync-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 10px; font-size: 12px; border-radius: 999px;
+  background: var(--bg); border: 1px solid var(--border); color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  cursor: default;
+}
+.sync-dot { width: 8px; height: 8px; border-radius: 999px; background: var(--text-faint); flex: 0 0 8px; }
+.sync-pill.synced .sync-dot { background: var(--success); }
+.sync-pill.syncing .sync-dot { background: var(--warn); animation: pulse 1.2s infinite; }
+.sync-pill.error .sync-dot { background: var(--error); }
+.sync-pill.offline .sync-dot { background: var(--text-faint); }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .3; } }
+
+.progress-wrap {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 12px; color: var(--text-muted); font-variant-numeric: tabular-nums;
+}
+.progress-bar { width: 160px; height: 6px; background: var(--border); border-radius: 999px; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--accent); transition: width .4s ease; }
+
+.search-wrap { margin-top: 12px; display: flex; gap: 10px; align-items: center; }
+.search {
+  flex: 1; max-width: 360px; padding: 7px 11px; font-size: 13px; border: 1px solid var(--border-strong);
+  border-radius: 7px; background: var(--bg); color: var(--text); outline: none;
+}
+.search:focus { border-color: var(--accent); background: var(--panel); }
+.icon-btn {
+  font-size: 12px; padding: 6px 10px; background: transparent; border: 1px solid var(--border-strong);
+  border-radius: 6px; cursor: pointer; color: var(--text-muted); display: inline-flex; align-items: center; gap: 6px;
+}
+.icon-btn:hover { background: var(--panel); color: var(--text); border-color: var(--text-muted); }
+.icon-btn svg { width: 14px; height: 14px; }
+
+main.split { flex: 1; display: flex; overflow: hidden; }
+.todos-pane {
+  width: 42%; min-width: 360px; max-width: 520px; border-right: 1px solid var(--border);
+  overflow-y: auto; background: var(--bg);
+}
+.detail-pane { flex: 1; overflow-y: auto; background: var(--panel); padding: 28px 36px; }
+
+.phase { border-bottom: 1px solid var(--border); }
+.phase-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 18px; cursor: pointer; user-select: none;
+  background: var(--bg); position: sticky; top: 0; z-index: 1;
+  border-bottom: 1px solid var(--border);
+}
+.phase-head:hover { background: var(--panel); }
+.phase-title { font-size: 12px; font-weight: 600; letter-spacing: 0.04em; color: var(--text); text-transform: uppercase; }
+.phase-meta { font-size: 11px; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+.chev { display: inline-block; transition: transform .2s; color: var(--text-faint); margin-right: 6px; font-size: 10px; }
+.phase.collapsed .phase-body { display: none; }
+.phase.collapsed .chev { transform: rotate(-90deg); }
+
+.todo {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 18px 10px 22px; cursor: pointer; position: relative;
+}
+.todo:hover { background: var(--panel); }
+.todo.active { background: var(--accent-soft); border-left: 3px solid var(--accent); padding-left: 19px; }
+.todo.hidden { display: none; }
+.todo.completed .todo-title { color: var(--text-muted); text-decoration: line-through; }
+
+.checkbox {
+  flex: 0 0 16px; width: 16px; height: 16px; margin-top: 2px;
+  border: 1.5px solid var(--border-strong); border-radius: 4px; background: var(--panel);
+  display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: all .15s;
+}
+.checkbox.checked { background: var(--success); border-color: var(--success); }
+.checkbox svg { width: 11px; height: 11px; color: white; opacity: 0; transition: opacity .15s; }
+.checkbox.checked svg { opacity: 1; }
+.checkbox:hover { border-color: var(--text-muted); }
+
+.todo-body { flex: 1; min-width: 0; }
+.todo-title { font-size: 13.5px; line-height: 1.4; color: var(--text); }
+.todo-meta { font-size: 11.5px; color: var(--text-muted); margin-top: 3px; display: flex; gap: 10px; flex-wrap: wrap; }
+.todo-badge {
+  display: inline-block; padding: 1px 6px; border-radius: 999px; font-size: 10px; font-weight: 500;
+  background: var(--accent-soft); color: var(--accent); margin-left: 6px;
+}
+
+/* DETAIL PANE */
+.detail-empty { color: var(--text-muted); }
+.detail-empty h2 { font-size: 22px; font-weight: 600; margin: 0 0 10px; letter-spacing: -0.01em; color: var(--text); }
+.detail-empty p { max-width: 620px; }
+.detail-empty .tip { margin-top: 24px; padding: 14px 16px; border-left: 3px solid var(--accent); background: var(--accent-soft); border-radius: 0 6px 6px 0; color: var(--text); font-size: 13px; }
+.detail-empty .warn-banner { margin-top: 16px; padding: 14px 16px; border-left: 3px solid var(--warn); background: var(--warn-soft); border-radius: 0 6px 6px 0; color: var(--text); font-size: 13px; }
+
+.detail-head { margin-bottom: 24px; }
+.detail-phase { font-size: 11px; font-weight: 600; letter-spacing: 0.05em; color: var(--accent); text-transform: uppercase; }
+.detail-title { font-size: 22px; font-weight: 600; margin: 6px 0 8px; letter-spacing: -0.01em; }
+.detail-summary { color: var(--text-muted); font-size: 14px; }
+
+.facts {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px;
+  margin: 22px 0 28px; padding: 14px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg);
+}
+.fact-label { font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-muted); }
+.fact-value { font-size: 13px; margin-top: 2px; color: var(--text); }
+
+.section { margin-bottom: 22px; }
+.section h3 {
+  font-size: 12px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
+  color: var(--text-muted); margin: 0 0 8px;
+}
+.section p { margin: 0; color: var(--text); }
+
+.links { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 28px; }
+.link-btn {
+  text-decoration: none; padding: 8px 14px; font-size: 13px;
+  border: 1px solid var(--border-strong); background: var(--panel); color: var(--text);
+  border-radius: 7px; transition: all .15s; cursor: pointer; display: inline-block;
+}
+.link-btn:hover { border-color: var(--accent); color: var(--accent); }
+.link-btn.primary { background: var(--accent); color: white; border-color: var(--accent); }
+.link-btn.primary:hover { background: #1e3a8a; color: white; }
+
+/* INTERVIEW QUESTIONS BLOCK */
+.iq-block { margin-top: 24px; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.iq-head {
+  padding: 14px 16px; background: var(--bg); border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+}
+.iq-head-title { font-size: 13px; font-weight: 600; color: var(--text); }
+.iq-head-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.iq-actions { display: flex; gap: 8px; }
+.iq-copy { padding: 6px 11px; font-size: 12px; border: 1px solid var(--border-strong); background: var(--panel); border-radius: 6px; cursor: pointer; color: var(--text); }
+.iq-copy:hover { border-color: var(--accent); color: var(--accent); }
+.iq-body { padding: 6px 16px 16px; max-height: 540px; overflow-y: auto; }
+.iq-section { border-top: 1px solid var(--border); padding: 12px 0 6px; }
+.iq-section:first-child { border-top: none; }
+.iq-section-title { font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--accent); margin: 4px 0 8px; }
+.iq-section-time { font-size: 11px; color: var(--text-faint); font-weight: 400; margin-left: 6px; }
+.iq-q { display: flex; gap: 10px; padding: 6px 0; font-size: 13.5px; line-height: 1.5; color: var(--text); }
+.iq-q-num { flex: 0 0 22px; color: var(--text-faint); font-variant-numeric: tabular-nums; }
+.iq-script { padding: 10px 12px; background: var(--accent-soft); border-radius: 6px; margin: 8px 0; font-style: italic; color: var(--text); font-size: 13px; }
+.iq-note { padding: 8px 12px; background: var(--warn-soft); border-radius: 6px; margin: 6px 0; font-size: 12.5px; color: var(--warn); }
+
+.empty-search { text-align: center; padding: 40px 20px; color: var(--text-muted); font-size: 13px; }
+.toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  padding: 10px 18px; background: #111827; color: white; border-radius: 999px;
+  font-size: 13px; opacity: 0; transition: opacity .2s; z-index: 100; pointer-events: none;
+}
+.toast.show { opacity: 1; }
+.toast.error { background: #991b1b; }
+
+/* MODAL */
+.modal-backdrop {
+  position: fixed; inset: 0; background: rgba(28, 25, 23, 0.5); display: none; align-items: center; justify-content: center; z-index: 50;
+}
+.modal-backdrop.show { display: flex; }
+.modal {
+  background: var(--panel); width: 480px; max-width: 92vw; border-radius: 12px; padding: 24px 26px;
+  box-shadow: 0 20px 50px rgba(0,0,0,.15);
+}
+.modal h2 { margin: 0 0 8px; font-size: 18px; font-weight: 600; }
+.modal .modal-sub { color: var(--text-muted); font-size: 13px; margin-bottom: 18px; }
+.field { margin-bottom: 14px; }
+.field label { display: block; font-size: 12px; font-weight: 600; letter-spacing: 0.04em; color: var(--text-muted); margin-bottom: 5px; text-transform: uppercase; }
+.field input[type=text], .field input[type=password] {
+  width: 100%; padding: 8px 11px; font-size: 13px; border: 1px solid var(--border-strong); border-radius: 7px;
+  background: var(--bg); color: var(--text); outline: none; font-family: inherit;
+}
+.field input:focus { border-color: var(--accent); background: var(--panel); }
+.field-hint { font-size: 11.5px; color: var(--text-muted); margin-top: 4px; }
+.field-hint a { color: var(--accent); text-decoration: none; }
+.field-row { display: flex; gap: 10px; }
+.field-row > * { flex: 1; }
+.show-btn {
+  padding: 8px 10px; font-size: 12px; border: 1px solid var(--border-strong); border-radius: 7px;
+  background: var(--bg); cursor: pointer; color: var(--text-muted);
+}
+.modal-actions { display: flex; justify-content: space-between; gap: 10px; margin-top: 18px; align-items: center; }
+.modal-actions .left { display: flex; gap: 8px; }
+.modal-status { font-size: 12px; color: var(--text-muted); margin-top: 12px; padding: 8px 12px; border-radius: 6px; }
+.modal-status.success { background: var(--success-soft); color: var(--success); }
+.modal-status.error { background: var(--error-soft); color: var(--error); }
+.modal-status.warn { background: var(--warn-soft); color: var(--warn); }
+
+@media (max-width: 800px) {
+  main.split { flex-direction: column; }
+  .todos-pane { width: 100%; max-width: none; max-height: 45vh; border-right: none; border-bottom: 1px solid var(--border); }
+  .detail-pane { padding: 22px 20px; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="top-row">
+      <div>
+        <h1>LifeOS — Build Dashboard</h1>
+        <div class="subtitle">Click any todo to see the detailed plan section. Tick the box when done. Progress syncs to GitHub.</div>
+      </div>
+      <div class="header-right">
+        <div class="sync-pill offline" id="sync-pill" title="Click the gear icon to configure GitHub sync">
+          <span class="sync-dot"></span>
+          <span id="sync-text">Not connected</span>
+        </div>
+        <div class="progress-wrap">
+          <span id="progress-text">0 / 0</span>
+          <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width: 0%"></div></div>
+          <span id="progress-percent" style="min-width: 36px; text-align: right;">0%</span>
+        </div>
+      </div>
+    </div>
+    <div class="search-wrap">
+      <input type="text" class="search" id="search" placeholder="Filter todos by keyword…" />
+      <button class="icon-btn" id="settings-btn" title="GitHub sync settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Sync settings
+      </button>
+      <button class="icon-btn" id="reset-progress">Reset progress</button>
+    </div>
+  </header>
+  <main class="split">
+    <aside class="todos-pane" id="todos-pane"></aside>
+    <section class="detail-pane" id="detail-pane"></section>
+  </main>
+</div>
+<div class="toast" id="toast"></div>
+
+<!-- SETTINGS MODAL -->
+<div class="modal-backdrop" id="settings-modal">
+  <div class="modal">
+    <h2>GitHub sync settings</h2>
+    <div class="modal-sub">Connect to your GitHub repo so progress syncs automatically across machines and survives 8 months from now.</div>
+    <div class="field">
+      <label>GitHub owner (username)</label>
+      <input type="text" id="cfg-owner" placeholder="your-github-username" autocomplete="off" />
+    </div>
+    <div class="field">
+      <label>Repo name</label>
+      <input type="text" id="cfg-repo" placeholder="lifeos" autocomplete="off" />
+    </div>
+    <div class="field">
+      <label>Branch</label>
+      <input type="text" id="cfg-branch" placeholder="main" autocomplete="off" />
+    </div>
+    <div class="field">
+      <label>Personal Access Token (PAT)</label>
+      <div class="field-row">
+        <input type="password" id="cfg-pat" placeholder="ghp_…" autocomplete="off" />
+        <button class="show-btn" id="cfg-pat-show" type="button">Show</button>
+      </div>
+      <div class="field-hint">Generate at <a href="https://github.com/settings/tokens/new?scopes=repo&description=LifeOS%20Dashboard" target="_blank" rel="noopener">github.com/settings/tokens</a> with the <strong>repo</strong> scope. Token stays only in this browser's localStorage — never sent anywhere except GitHub.</div>
+    </div>
+    <div class="modal-status" id="modal-status" style="display:none;"></div>
+    <div class="modal-actions">
+      <div class="left">
+        <button class="link-btn" id="cfg-disconnect">Disconnect</button>
+      </div>
+      <div class="left">
+        <button class="link-btn" id="cfg-cancel">Cancel</button>
+        <button class="link-btn primary" id="cfg-save">Connect &amp; sync</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// =====================================================================
+// PHASES + TODOS — derived directly from /docs/Master-Plan.md
+// =====================================================================
+const PHASES = [
+  { id: 'p0', label: 'Phase 0 — De-risk (Week 1)' },
+  { id: 'p1', label: 'Phase 1 — Synthesize + Design (Weeks 2–3)' },
+  { id: 'p2', label: 'Phase 2 — Engineering Kickoff (Week 4)' },
+  { id: 'p3', label: 'Phase 3 — Build v1 (Months 2–4)' },
+  { id: 'p4', label: 'Phase 4 — Private Beta (Month 5)' },
+  { id: 'p5', label: 'Phase 5 — Build v1.5 (Months 5–7)' },
+  { id: 'p6', label: 'Phase 6 — Public Launch (Month 7)' },
+  { id: 'p7', label: 'Phase 7 — v2 Horizon (Months 8–12)' },
+];
+
+const TODOS = [
+  { id: 'p0-1', phase: 'p0', title: 'Lock the name — trademark + domain checks', owner: 'Ops / Founder', duration: '2 days', summary: 'Confirm "LifeOS" is legally available and a domain is secured — or fall back to Plan B before any design or marketing work begins.', activities: 'Run "LifeOS" through trademark databases — USPTO (US), EUIPO (Europe), Indian Trademark Registry. Check domain availability across lifeos.com / .app / .io / .ai. If unavailable, fall back to the shortlist (Cortex / Trace / Index / Loop / Ground) and repeat.', success: 'Name confirmed available in target markets, primary domain secured (or strong alternative locked in).', deliverable: 'One-page decision doc with screenshots of search results and the final name + domain.', risk: '"LifeOS" is descriptive enough that some variant is taken. Have Plan B and Plan C ready before Monday morning so we don\'t lose a day.' },
+  { id: 'p0-2', phase: 'p0', title: 'Recruit 15 user interview participants', owner: 'Founder + Designer', duration: '2–3 days', summary: 'Source a stress-test cohort spanning founders, sales reps, students, consultants, and high-confidentiality professionals.', activities: 'Recruit across archetypes — 3 founders, 3 sales reps, 3 students, 3 consultants/freelancers, 3 doctors/therapists/lawyers. Mix Indian and non-Indian users; at least 8 Indian users to stress-test the Hindi-English angle. Source from personal network, communities, LinkedIn.', success: '15 interviews booked on calendar within 3 days.', deliverable: 'Calendar slots, signed (verbal) consent for recording, archetype label per participant.', risk: 'Founder network bias. Mitigation: actively recruit outside your bubble (target ≥7 non-founders).' },
+  { id: 'p0-3', phase: 'p0', title: 'Conduct 15 user interviews', owner: 'Founder + Designer', duration: '5 days (parallel with recruitment)', summary: 'Run the 30-minute script across all 15 conversations. Listen, don\'t pitch.', special: 'interview-questions', activities: 'Use the Interview Guide exactly — same script across all 15 to keep synthesis comparable. Record with consent. Designer takes notes; founder leads the conversation. Five-minute synthesis after each call while memory is fresh.', success: 'All 15 interviews completed with recordings + notes.', deliverable: '15 interview notes + audio recordings stored in a shared folder.', risk: 'Confirmation bias. Mitigation: the designer asks the cold follow-up questions; share notes daily with the engineer doing the technical spike.' },
+  { id: 'p0-4', phase: 'p0', title: 'Synthesize interview findings', owner: 'Founder + Designer', duration: '1 day end of Week 1', summary: 'Distill 15 interviews into 5 themes, 5 quotes, a segment heatmap, and a go/pivot/kill recommendation.', activities: 'Pull patterns from daily notes. Identify the top 5 themes — what kept coming up. Pull 5 verbatim quotes. Build a segment heatmap. Recommend: build as is, pivot to narrower v1, or kill.', success: 'Clear signal on whether the "meeting moment" is universal or one segment dominates.', deliverable: 'Synthesis doc with themes, quotes, heatmap, and go/pivot/kill recommendation.', risk: 'Patterns are muddy — 15 isn\'t enough. Mitigation: if weak, run 5 more in Week 2 before deciding.' },
+  { id: 'p0-5', phase: 'p0', title: 'Run transcription quality spike', owner: '1 senior engineer', duration: '5 days', summary: 'Prove (or disprove) that off-the-shelf ASR can handle Indian English and Hinglish at our quality bar before we commit to v1.', activities: 'Record 10 meetings spanning conditions LifeOS must handle — 3 Indian-English Zoom, 2 Hindi-English code-switched, 2 noisy in-person, 2 US-English video, 1 lecture. Run each through Deepgram Nova-2, AssemblyAI Universal-2, and Whisper-large-v3. Hand-label 5-minute segments and compute WER.', success: 'At least one provider hits <8% WER on Indian English and <10% on Hindi-English code-switching.', deliverable: 'One-page comparison table + recommendation memo + the 10 recordings retained for regression testing.', risk: 'All three providers weak — adds 6–8 weeks for own-model fine-tune. Point of the spike is to learn this now.' },
+  { id: 'p0-6', phase: 'p0', title: 'Make the Go / Pivot / Kill call', owner: 'Founder', duration: 'End of Week 1', summary: 'Based on the outputs of all three Phase 0 workstreams, make a single, documented decision.', activities: 'Review all three Phase 0 outputs. Confirm name is locked. Confirm interview synthesis supports the moment. Confirm transcription quality is reachable. Make the call.', success: 'Decision documented in writing and shared with team.', deliverable: 'One-paragraph decision memo with reasoning.', risk: 'Wishful thinking. Mitigation: invite designer and lead engineer to a 60-minute meeting where each has veto.' },
+
+  { id: 'p1-1', phase: 'p1', title: 'Revise v1 Product Spec based on Phase 0', owner: 'Founder + Designer', duration: '3 days', summary: 'Edit the spec ruthlessly against what Phase 0 actually showed.', activities: 'Review the v1 spec against Phase 0 findings. Edit every section that contradicts what users actually said. Strengthen the anti-scope. Update the default note template if needed.', success: 'No section of the spec contradicts what users said in interviews.', deliverable: 'Spec v0.2, signed off by founder + designer + lead engineer.', risk: 'Scope creep — every interview generates a feature idea. Anti-scope is the rule.' },
+  { id: 'p1-2', phase: 'p1', title: 'Wireframe the 6 key screens (low-fi)', owner: 'Designer', duration: '5 days (Week 2)', summary: 'Paper or Figma wireframes for Home/Library, Meeting view, Live overlay, Global chat, Pre-meeting prep, Settings.', activities: 'Wireframe each of the six screens. No visual polish — focus on flow and information hierarchy. Test against the daily journey.', success: 'Each wireframe can be explained in one sentence; full daily flow walks end to end.', deliverable: 'Wireframe deck shared with engineering for feasibility review.', risk: 'Adding screens. Six screens for v1.' },
+  { id: 'p1-3', phase: 'p1', title: 'Write technical architecture doc', owner: 'Lead engineer', duration: '5 days (Week 2)', summary: 'Document v1 architecture end-to-end so two engineers reading it could sketch the same system.', activities: 'Document client (Electron or native Mac), backend services, data model for the knowledge graph, choice of ASR/LLM/embeddings/DB. Build-vs-buy captured.', success: 'Two engineers reading it independently can sketch the same system.', deliverable: '5–10 page architecture doc with diagrams.', risk: 'Over-engineering for v2 features. Discipline: v1 architecture, v2 hooks where cheap.' },
+  { id: 'p1-4', phase: 'p1', title: 'Build mid-fidelity Figma mockups', owner: 'Designer', duration: '5 days (Week 3)', summary: 'Take wireframes to mid-fi: real type, real grid, real component states.', activities: 'Promote wireframes to mid-fi. Real type, grid, component states. Cover empty/loading/error/success for every screen.', success: 'Engineering can estimate the build from the file.', deliverable: 'Figma file shared with engineering.', risk: 'Pixel-polish trap — mid-fi, not high-fi.' },
+  { id: 'p1-5', phase: 'p1', title: 'Kick off beta user recruitment', owner: 'Founder', duration: 'Starts Week 3, continues for months', summary: 'Start building the list of 100 private-beta users now.', activities: 'Build a CRM of potential beta users across archetypes. Reach out personally; capture archetype, willingness-to-pay signal, calendar link.', success: '30 users confirmed by end of Week 4. Final target 100 by end of Month 4.', deliverable: 'A growing beta list with verified contact info.', risk: 'Starting too late. Start in Week 3, never stop.' },
+
+  { id: 'p2-1', phase: 'p2', title: 'Break v1 into 6–10 engineering epics', owner: 'Lead engineer + Founder', duration: '2 days', summary: 'Sequence v1 into named epics with effort estimates and dependencies.', activities: 'Break v1 into epics with name, description, S/M/L/XL estimate, dependency map.', success: 'Total estimate within 10% of the 4-month v1 budget. If it\'s 6 months, scope is cut.', deliverable: 'Epic doc with estimates and dependency graph.', risk: 'Optimism bias. Each estimate reviewed by the engineer who will build it.' },
+  { id: 'p2-2', phase: 'p2', title: 'Set up stack + infrastructure', owner: 'Lead engineer', duration: '3 days', summary: 'Cloud, CI/CD, error tracking, secrets, observability, vendor accounts.', activities: 'Provision cloud, CI/CD, repo conventions, error tracking, secrets, observability. Lock in vendor accounts.', success: '"Hello world" deployment from a developer machine to staging.', deliverable: 'Staging environment with a deployable skeleton.', risk: 'Yak-shaving. Pick simplest tools; reach for managed services first.' },
+  { id: 'p2-3', phase: 'p2', title: 'Confirm team roster / hire gaps', owner: 'Founder', duration: 'Week 4 onward', summary: 'Map every epic to an owner. Start hiring or contracting in Week 4 if gaps exist.', activities: 'Confirm team can deliver every epic within 4-month budget. If not, hire/contract now.', success: 'Every epic has a named owner; no orphan epics.', deliverable: 'Roster doc.', risk: 'Hiring takes longer than expected. Start in Week 4.' },
+  { id: 'p2-4', phase: 'p2', title: 'Build design system v1', owner: 'Designer', duration: '5 days', summary: 'Minimal design system — type, colour, spacing, core components.', activities: 'Define type scale, colour, spacing, basic components.', success: 'Engineering can use it to build any screen in the wireframes.', deliverable: 'Figma library + Storybook skeleton.', risk: 'Premature complexity. Ship smallest set possible.' },
+
+  { id: 'p3-1', phase: 'p3', title: 'Build audio capture (Mac)', owner: 'Engineer (Mac)', duration: '~3 weeks (Month 2)', summary: 'ScreenCaptureKit + Core Audio. Reliable system audio + mic capture during Zoom, Meet, Teams.', activities: 'System audio via ScreenCaptureKit. Mic via Core Audio. Test against Zoom, Meet, Teams.', success: 'Clean audio across all three platforms with no per-meeting user setup.', deliverable: 'Audio capture module integrated.', risk: 'macOS permission UX is tricky. Invest in the permission flow.' },
+  { id: 'p3-2', phase: 'p3', title: 'Build transcription pipeline', owner: 'Engineer (backend)', duration: '~3 weeks (Month 2)', summary: 'Real-time streaming transcription with diarization.', activities: 'Integrate the chosen ASR. Streaming with diarization, reconnects, partial transcripts, multilingual.', success: 'Spoken-to-displayed <2s median; diarization ≥85% correct.', deliverable: 'Streaming transcript service.', risk: 'Provider rate limits or outages. Fallback provider switch.' },
+  { id: 'p3-3', phase: 'p3', title: 'Build knowledge graph data layer', owner: 'Engineer (backend)', duration: '~2 weeks (Month 2)', summary: 'Postgres tables for nodes, edges, and provenance.', activities: 'Nodes table, edges table, provenance table. Insert/query API.', success: 'Every entity queryable back with source transcript moment.', deliverable: 'Graph layer schema + API.', risk: 'Building for v2 features. v1 surface area only.' },
+  { id: 'p3-4', phase: 'p3', title: 'Build skeleton app shell', owner: 'Engineer (client)', duration: '~2 weeks (Month 2)', summary: 'Sign-in, home, settings, navigation.', activities: 'Use design system. Wire telemetry + error tracking from day one.', success: 'Team can install and sign in; navigation works end to end.', deliverable: 'Installable app skeleton.', risk: 'Treating the shell as a side project. It\'s the first thing users touch.' },
+  { id: 'p3-5', phase: 'p3', title: 'Build structured note generation', owner: 'Engineer (backend) + Designer', duration: '~3 weeks (Month 3)', summary: 'AI turns transcript into the default template.', activities: 'Post-meeting LLM pipeline. Default template. Tune prompts against Phase 0 recordings.', success: 'Hallucination <1% on benchmark; time-to-note <60s median.', deliverable: 'Service + editable UI.', risk: 'Hallucinations on key facts. Source-ground every section.' },
+  { id: 'p3-6', phase: 'p3', title: 'Build Meeting view UI', owner: 'Engineer (client) + Designer', duration: '~2 weeks (Month 3)', summary: 'Two-pane Meeting view — structured note + transcript.', activities: 'Build the view per mid-fi mockups. Click any AI bullet to jump to that transcript moment.', success: 'User can read/edit/navigate end-to-end without friction.', deliverable: 'Meeting view with editable note + transcript navigation.', risk: '"Jump to moment" is critical for trust.' },
+  { id: 'p3-7', phase: 'p3', title: 'Build entity extraction', owner: 'Engineer (backend)', duration: '~2 weeks (Month 3)', summary: 'Silent extraction of people, companies, projects, decisions, action items, amounts, dates, topics.', activities: 'Extraction passes after each meeting. Deduplicate against existing entities. Store with provenance.', success: 'Entities accurately tagged; dedup works ≥80% of cases at v1.', deliverable: 'Extraction service writing to graph.', risk: 'Entity resolution is hard. v1 fuzzy, fix in v1.5.' },
+  { id: 'p3-8', phase: 'p3', title: 'Build search (full-text + semantic)', owner: 'Engineer (backend)', duration: '~1 week (Month 3)', summary: 'Search across every meeting — keyword + semantic.', activities: 'Postgres full-text + pgvector embeddings. Use graph for filters.', success: 'Median search <500ms; relevant results in top 3.', deliverable: 'Search bar with combined results.', risk: 'Relevance tuning is ongoing. Set up a relevance-test set.' },
+  { id: 'p3-9', phase: 'p3', title: 'Build live overlay', owner: 'Engineer (client) + Designer', duration: '~1 week (Month 3)', summary: 'Small floating window during meetings.', activities: 'Live transcript + real-time AI bullets + flag button. Users can close it without stopping recording.', success: 'Doesn\'t break focus; repositionable.', deliverable: 'Overlay component on Mac.', risk: 'Competes with meeting attention. Default to minimal.' },
+  { id: 'p3-10', phase: 'p3', title: 'Build pre-meeting prep + calendar', owner: 'Engineer (backend) + Designer', duration: '~1.5 weeks (Month 4)', summary: 'Calendar read-only integration; pre-meeting prep card.', activities: 'OAuth Google/Microsoft. Surface upcoming meetings. Prep card with user context that biases the note.', success: '80%+ of scheduled meetings get the prep card.', deliverable: 'Calendar + prep flow.', risk: 'OAuth UX. Invest dev time.' },
+  { id: 'p3-11', phase: 'p3', title: 'Build meeting chat (single meeting)', owner: 'Engineer (backend) + Designer', duration: '~1 week (Month 4)', summary: 'Ask any question about a single meeting; answers cite transcript timestamps.', activities: 'LLM with transcript + note in context. Every answer cites the moment.', success: 'Source-grounded; zero invented quotes.', deliverable: 'Chat panel in Meeting view.', risk: 'Hallucination on retrieval is fatal. Refuse to answer if not in transcript.' },
+  { id: 'p3-12', phase: 'p3', title: 'Build global chat (cross-meeting memory)', owner: 'Engineer (backend) + Designer', duration: '~2 weeks (Month 4)', summary: 'Ask questions across every meeting ever recorded — the "second brain" core.', activities: 'Hybrid retrieval: embeddings + graph. Every answer cites source meetings + timestamps.', success: '80%+ of test questions get accurate, sourced answers.', deliverable: 'Global chat as full-screen view.', risk: 'This is the killer feature. Ship well or the long-term-value story collapses.' },
+  { id: 'p3-13', phase: 'p3', title: 'Build share / export', owner: 'Engineer (client)', duration: '~3 days (Month 4)', summary: 'One-click share as a public link, Markdown, or PDF.', activities: 'Public-link sharing with optional expiration. Markdown + PDF export. Track opens privately.', success: 'Share in <10 seconds.', deliverable: 'Share + export controls.', risk: 'Privacy oversights. Explicit consent + clear link permissions.' },
+  { id: 'p3-14', phase: 'p3', title: 'Build onboarding + polish', owner: 'Designer + Engineer (client)', duration: '~2 weeks (Month 4)', summary: 'First-run, microcopy, empty/error states. Final week of pure polish.', activities: 'First-run flow. Empty/error/loading states. Final week: no new features, only polish.', success: 'New user completes first recorded meeting unassisted.', deliverable: 'Polished v1 ready for private beta.', risk: 'Onboarding always under-staffed. Dedicate ≥1 engineer-week + full design.' },
+
+  { id: 'p4-1', phase: 'p4', title: 'Onboard private beta wave 1 (25 users)', owner: 'Founder + Designer', duration: 'Week 1 of Month 5', summary: 'First 25 users — hand-onboarded with a one-to-one Loom or call each.', activities: 'Hand-onboard one at a time. Watch install, permissions, first recording, review.', success: '≥20 of 25 record a meeting within 48h.', deliverable: 'Onboarding notes, bugs, fixes shipped.', risk: 'First-impression problems compound. Founder on every call.' },
+  { id: 'p4-2', phase: 'p4', title: 'Onboard waves 2–4 (75 more users)', owner: 'Founder + Designer', duration: 'Weeks 2–4 of Month 5', summary: '25 users per week. Less hand-holding as you learn.', activities: 'Roll out waves of 25. Tighten onboarding based on wave 1.', success: 'All 100 beta users onboarded by end of Month 5.', deliverable: 'Full beta cohort with telemetry.', risk: 'Onboarding regressions. Track activation funnel weekly.' },
+  { id: 'p4-3', phase: 'p4', title: 'Run weekly beta interviews (5/week)', owner: 'Founder + Designer', duration: 'Throughout Month 5', summary: 'Five 30-minute calls per week, rotating archetypes.', activities: 'Ask about specific recent meetings. Add to running synthesis daily.', success: 'Weekly themes feed bug triage and next-sprint planning.', deliverable: '20+ beta interviews with structured synthesis.', risk: 'Interview fatigue. Batch on 2 days/week.' },
+  { id: 'p4-4', phase: 'p4', title: 'Daily bug triage', owner: 'Lead engineer', duration: 'Throughout Month 5', summary: '"This is wrong" reports triage within 24 hours.', activities: 'Daily standup. Track in one channel.', success: 'Mean time to triage <24h; high-priority fix <72h.', deliverable: 'Bug board with throughput.', risk: 'Bug backlog overwhelming feature work. Weekly bug-to-feature ratio review.' },
+
+  { id: 'p5-1', phase: 'p5', title: 'Build Todo tab', owner: 'Engineer + Designer', duration: '~4 weeks (Months 5–6)', summary: 'Action items from meetings become first-class todos. Manual todos too.', activities: 'Build the tab with auto-flow from meetings, manual creation, filters.', success: 'Users complete "meeting → action item → done" without leaving LifeOS.', deliverable: 'Todo tab with cross-tab linkage.', risk: 'Todo apps are mature. The meeting integration is the unique value.' },
+  { id: 'p5-2', phase: 'p5', title: 'Build Expense tab', owner: 'Engineer + Designer', duration: '~3 weeks (Month 6)', summary: 'Amounts mentioned in meetings become pending expense entries.', activities: 'Build the tab with auto-flow from meetings, manual entry, monthly view.', success: 'Users review pending expenses without missing a discussed amount.', deliverable: 'Expense tab with auto-flow + manual entry.', risk: 'Mature category. Same: meeting integration is the wedge.' },
+  { id: 'p5-3', phase: 'p5', title: 'Port to Windows', owner: 'Engineer (Windows)', duration: '~6 weeks (Months 5–7)', summary: 'Match Mac feature parity. Audio capture via WASAPI.', activities: 'WASAPI audio capture. UI parity with Mac. Test against Phase 0 conditions.', success: 'Windows users get same v1+v1.5 experience as Mac.', deliverable: 'Windows app at parity.', risk: 'Cross-platform UI drift. Shared component library; visual diff tests.' },
+  { id: 'p5-4', phase: 'p5', title: 'Build entity resolution UI', owner: 'Engineer + Designer', duration: '~1 week (Month 6)', summary: 'Let users merge duplicate people/projects/topics.', activities: 'Settings-level entity browser. Show duplicates. One-click merge with undo.', success: 'Users resolve dupes in <30s per pair.', deliverable: 'Entity resolution in Settings.', risk: 'Merging is destructive — ensure undo.' },
+  { id: 'p5-5', phase: 'p5', title: 'Set up payments + pricing', owner: 'Engineer + Founder', duration: '~2 weeks (Month 6)', summary: 'Stripe, free vs Pro tiers, India pricing (₹599), trial.', activities: 'Stripe integration. Free vs Pro logic. India payments + GST.', success: 'Signup → free-tier limit → upgrade → pay in <2 minutes.', deliverable: 'Payments in production behind feature flag.', risk: 'India payments + GST. Use a provider with built-in India support.' },
+
+  { id: 'p6-1', phase: 'p6', title: 'Build marketing site', owner: 'Designer + Founder', duration: '~2 weeks (Month 7)', summary: 'One page. Positioning line above the fold. 3 screenshots. Pricing. Privacy.', activities: 'One-page site. Hero with positioning. 3 screenshots. Pricing. Trust signals.', success: 'Visitor-to-signup conversion ≥5%.', deliverable: 'Live site on the locked domain.', risk: 'Over-designing. Keep it one page.' },
+  { id: 'p6-2', phase: 'p6', title: 'Coordinate launch motion', owner: 'Founder', duration: 'Launch week of Month 7', summary: 'Product Hunt, HN, Indian product communities, founder Twitter, subreddits.', activities: 'Coordinated day. Brief beta users. Founders on standby all day.', success: '10,000 signups in 30 days, anchored by launch week.', deliverable: 'Live launch with measurable traffic + signup.', risk: 'Flat launch without amplification. Warm up beta + network beforehand.' },
+  { id: 'p6-3', phase: 'p6', title: 'Seed 3 long-form content pieces', owner: 'Founder', duration: '2–3 weeks pre-launch', summary: '"One-app thesis," "how we built the graph," "the case against Granola for India."', activities: 'Write 3 flagship posts. Publish in days leading up to and during launch.', success: 'Posts earn ≥10k views in launch month.', deliverable: 'Three published essays.', risk: 'Writing late. Drafts done 2 weeks before launch.' },
+  { id: 'p6-4', phase: 'p6', title: 'Set up customer support', owner: 'Founder + 1 ops', duration: 'Ongoing from launch', summary: 'Real human answers every email for first 60 days. Founder included.', activities: 'Inbox + ticketing. Founder personally handles support for 60 days.', success: 'Median response <4h during launch month.', deliverable: 'Live support function with metrics.', risk: 'Volume exceeds capacity. Hire ops before launch.' },
+  { id: 'p6-5', phase: 'p6', title: 'Tighten activation funnel', owner: 'Founder + Lead engineer', duration: 'Ongoing 30 days post-launch', summary: 'Use 1,000+ user data to find and fix the biggest funnel drop.', activities: 'Watch funnel daily. Fix biggest drop. Repeat for 30 days.', success: 'Activation rate improves ≥30% from launch-week baseline.', deliverable: 'Funnel dashboard + weekly improvement log.', risk: 'Premature feature work. No new features for 30 days post-launch.' },
+
+  { id: 'p7-1', phase: 'p7', title: 'Build visual graph view', owner: 'Engineer + Designer', duration: '~8 weeks (Months 8–9)', summary: 'The Obsidian-style galaxy, auto-built from v1 data.', activities: 'Interactive visual graph. Click any node. Filters by entity type, time, person.', success: 'Users who try graph have ≥30% higher 30-day retention.', deliverable: 'Visual graph view accessible from Home.', risk: 'Visual complexity overwhelms. Progressive disclosure.' },
+  { id: 'p7-2', phase: 'p7', title: 'Build mobile companion app', owner: 'Engineer (mobile)', duration: '~10 weeks (Months 8–10)', summary: 'iOS + Android. Review meetings, search, dictation, in-person capture.', activities: 'Native iOS + Android. Review-first; capture via mic. Sync with desktop.', success: 'Mobile DAU / desktop DAU ≥0.5 within 60 days.', deliverable: 'iOS + Android apps live.', risk: 'Splitting focus. Mobile is review-first, not capture-first.' },
+  { id: 'p7-3', phase: 'p7', title: 'Build standalone notes module', owner: 'Engineer + Designer', duration: '~3 weeks (Month 10)', summary: 'Manual notes that participate in the graph via @mention.', activities: 'Markdown notes. @mention any entity. Note becomes a graph node.', success: 'Power users create ≥3 standalone notes/week.', deliverable: 'Notes tab.', risk: 'Becomes another notes app. Lean on @mention.' },
+  { id: 'p7-4', phase: 'p7', title: 'Build public sharing for project spaces', owner: 'Engineer + Designer', duration: '~3 weeks (Month 11)', summary: 'Project spaces shareable with a public link. Read-only.', activities: 'Public-link shareable spaces. Owner controls scope.', success: 'Shared spaces earn organic signups.', deliverable: 'Shareable project spaces.', risk: 'Privacy oversights at share time. Explicit per-element consent.' },
+  { id: 'p7-5', phase: 'p7', title: 'Build API + integrations (Slack, Linear, Notion)', owner: 'Engineer + Partnerships', duration: '~6 weeks (Months 10–12)', summary: 'Export to Slack, Linear, Notion. Calendar write. API foundation.', activities: 'Slack post, Linear issue, Notion export, Calendar follow-up create. Public API.', success: '≥10% of active users use ≥1 integration weekly.', deliverable: 'Integrations live + API docs.', risk: 'Maintenance-heavy. Start with 3 well-maintained.' },
+  { id: 'p7-6', phase: 'p7', title: 'Build on-device transcription (Sensitive Mode)', owner: 'Engineer', duration: '~6 weeks (Months 11–12)', summary: 'Premium tier — privacy-first transcription with no cloud round-trip.', activities: 'On-device Whisper or equivalent. Premium tier. Market to doctors, lawyers, therapists.', success: '≥20% of Pro users enable Sensitive Mode within 60 days.', deliverable: 'Sensitive Mode in paid tier.', risk: 'On-device quality lags cloud. Be clear: privacy-first, not accuracy-first.' },
+];
+
+// Interview questions - rendered inline when the p0-3 todo is opened
+const INTERVIEW_GUIDE = [
+  { type: 'note', text: 'Before each interview — 60-second checklist: recording on (with verbal consent), note-taker present, 30-min hard stop, do NOT pitch the product.' },
+  { type: 'script', text: '"Thanks for taking the time. I\'m doing research on how people capture and remember information from meetings — not pitching anything. Mind if I record?"' },
+  { type: 'section', title: 'Section 1 — Their meeting reality', time: '5 min' },
+  { type: 'q', n: 1, text: 'How many meetings/conversations do you have in a typical week — work, personal, vendors, classes, anything?' },
+  { type: 'q', n: 2, text: 'Walk me through your last meeting — not what was said, but what you did. Before. During. After.' },
+  { type: 'q', n: 3, text: 'Of those meetings, how many do you genuinely care about remembering vs the routine ones?' },
+  { type: 'q', n: 4, text: 'Are there meetings you wish you didn\'t have to remember, but you do? Which?' },
+  { type: 'section', title: 'Section 2 — Current tools and behaviour', time: '8 min' },
+  { type: 'q', n: 5, text: 'What tools do you currently use, if any, for meeting notes? Walk me through the most recent example.' },
+  { type: 'q', n: 6, text: 'Can you show me your notes from your last meeting? Right now, on your screen.', emphasis: true },
+  { type: 'q', n: 7, text: 'Have you ever tried Granola, Otter, Fireflies, Read.ai, Notion AI, ChatGPT for meeting notes? What happened?' },
+  { type: 'q', n: 8, text: 'When you need to find something from an old meeting — a number, a decision, who said what — what do you do?' },
+  { type: 'q', n: 9, text: 'Do you ever share meeting notes with someone else? How? What format?' },
+  { type: 'section', title: 'Section 3 — Pain points (most important)', time: '10 min' },
+  { type: 'q', n: 10, text: 'Tell me about the last time you forgot something important from a meeting and it cost you something.' },
+  { type: 'q', n: 11, text: 'What\'s the most frustrating part of how you capture meetings today?' },
+  { type: 'q', n: 12, text: 'If you could wave a magic wand and change one thing about how meetings get remembered, what would you change?' },
+  { type: 'q', n: 13, text: 'Tell me about a time you wished you could ask "what did so-and-so say about X?" — but couldn\'t find it.' },
+  { type: 'q', n: 14, text: 'Do you ever go back and look at notes from meetings that happened weeks or months ago? Why or why not?' },
+  { type: 'q', n: 15, text: 'When you\'re in a meeting, what would you rather be doing than taking notes?' },
+  { type: 'q', n: 16, text: 'Has anyone ever sent you AI-generated meeting notes (Otter, Granola, etc)? What was that experience like?' },
+  { type: 'section', title: 'Section 4 — Future state', time: '3 min' },
+  { type: 'q', n: 17, text: 'If an app could capture every conversation perfectly and let you ask it questions later — what would you ask it?' },
+  { type: 'q', n: 18, text: 'What\'s the biggest thing such an app would have to do — or NOT do — for you to actually trust it?' },
+  { type: 'q', n: 19, text: 'Roughly, what would something like that be worth to you per month? Are you currently paying for any tool for this?' },
+  { type: 'section', title: 'Section 5 — Wrap-up', time: '2 min' },
+  { type: 'q', n: 20, text: 'Is there anything I should have asked you that I didn\'t?' },
+  { type: 'q', n: 21, text: 'Who else do you know who I should talk to? Especially anyone who does this differently from you.' },
+  { type: 'q', n: 22, text: 'Can I follow up in a few weeks if I have more questions?' },
+  { type: 'note', text: 'After each interview — 5-min synthesis: top 3 takeaways, one quote, tag as validating/contradicting/pivot/kill, segment + pain level, names for follow-up.' },
+];
+
+// =====================================================================
+// STATE MANAGEMENT — local first, then GitHub sync
+// =====================================================================
+const LOCAL_KEY = 'lifeos-dashboard-v2';
+const CFG_KEY = 'lifeos-dashboard-cfg-v1';
+const STATE_PATH = 'state/dashboard-state.json';
+
+let state = { completed: {}, collapsed: {}, activeTodo: null, updatedAt: null };
+let cfg = { owner: '', repo: 'lifeos', branch: 'main', pat: '' };
+let stateSha = null; // SHA of the current state file on GitHub
+let saveTimer = null;
+let isSyncing = false;
+let lastSyncedAt = null;
+
+function loadLocalState() {
+  try {
+    const saved = localStorage.getItem(LOCAL_KEY);
+    if (saved) state = Object.assign(state, JSON.parse(saved));
+  } catch (e) {}
+}
+function persistLocal() {
+  state.updatedAt = new Date().toISOString();
+  try { localStorage.setItem(LOCAL_KEY, JSON.stringify(state)); } catch (e) {}
+}
+function loadCfg() {
+  try {
+    const saved = localStorage.getItem(CFG_KEY);
+    if (saved) cfg = Object.assign(cfg, JSON.parse(saved));
+  } catch (e) {}
+}
+function persistCfg() {
+  try { localStorage.setItem(CFG_KEY, JSON.stringify(cfg)); } catch (e) {}
+}
+
+// =====================================================================
+// GITHUB API LAYER
+// =====================================================================
+const GH_API = 'https://api.github.com';
+function isConfigured() {
+  return !!(cfg.owner && cfg.repo && cfg.pat);
+}
+async function ghRequest(path, opts = {}) {
+  const url = `${GH_API}${path}`;
+  const headers = Object.assign({
+    'Authorization': `token ${cfg.pat}`,
+    'Accept': 'application/vnd.github+json',
+    'X-GitHub-Api-Version': '2022-11-28',
+  }, opts.headers || {});
+  const res = await fetch(url, Object.assign({ headers }, opts));
+  return res;
+}
+
+async function fetchRemoteState() {
+  if (!isConfigured()) return null;
+  const path = `/repos/${cfg.owner}/${cfg.repo}/contents/${STATE_PATH}?ref=${encodeURIComponent(cfg.branch)}`;
+  const res = await ghRequest(path);
+  if (res.status === 404) {
+    stateSha = null;
+    return null;
+  }
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(`GitHub ${res.status}: ${err.message || 'fetch failed'}`);
+  }
+  const data = await res.json();
+  stateSha = data.sha;
+  try {
+    const content = atob(data.content.replace(/\s/g, ''));
+    return JSON.parse(content);
+  } catch (e) {
+    throw new Error('Could not parse remote state JSON');
+  }
+}
+
+async function pushRemoteState() {
+  if (!isConfigured()) return;
+  const path = `/repos/${cfg.owner}/${cfg.repo}/contents/${STATE_PATH}`;
+  const content = btoa(JSON.stringify(state, null, 2));
+  const body = {
+    message: 'dashboard: progress update [auto]',
+    content,
+    branch: cfg.branch,
+  };
+  if (stateSha) body.sha = stateSha;
+  const res = await ghRequest(path, {
+    method: 'PUT',
+    body: JSON.stringify(body),
+    headers: { 'Content-Type': 'application/json' },
+  });
+  if (res.status === 409) {
+    // SHA mismatch — someone else updated. Refetch and retry once.
+    await fetchRemoteState(); // updates stateSha
+    body.sha = stateSha;
+    const retry = await ghRequest(path, {
+      method: 'PUT',
+      body: JSON.stringify(body),
+      headers: { 'Content-Type': 'application/json' },
+    });
+    if (!retry.ok) {
+      const err = await retry.json().catch(() => ({}));
+      throw new Error(`GitHub ${retry.status}: ${err.message || 'push failed'}`);
+    }
+    const data = await retry.json();
+    stateSha = data.content.sha;
+    return;
+  }
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(`GitHub ${res.status}: ${err.message || 'push failed'}`);
+  }
+  const data = await res.json();
+  stateSha = data.content.sha;
+}
+
+async function syncToRemote() {
+  if (!isConfigured()) {
+    setSyncStatus('offline', 'Not connected');
+    return;
+  }
+  isSyncing = true;
+  setSyncStatus('syncing', 'Syncing…');
+  try {
+    await pushRemoteState();
+    lastSyncedAt = new Date();
+    setSyncStatus('synced', `Synced ${formatTimeAgo(lastSyncedAt)}`);
+  } catch (e) {
+    console.error('Sync error:', e);
+    setSyncStatus('error', `Sync failed`);
+    showToast('Sync failed: ' + e.message, true);
+  } finally {
+    isSyncing = false;
+  }
+}
+
+function scheduleSync() {
+  if (!isConfigured()) return;
+  clearTimeout(saveTimer);
+  setSyncStatus('syncing', 'Saving…');
+  saveTimer = setTimeout(() => { syncToRemote(); }, 1500);
+}
+
+function formatTimeAgo(d) {
+  if (!d) return '';
+  const s = Math.round((new Date() - d) / 1000);
+  if (s < 60) return `${s}s ago`;
+  const m = Math.round(s / 60);
+  if (m < 60) return `${m}m ago`;
+  const h = Math.round(m / 60);
+  return `${h}h ago`;
+}
+
+// =====================================================================
+// SYNC PILL UI
+// =====================================================================
+const syncPillEl = document.getElementById('sync-pill');
+const syncTextEl = document.getElementById('sync-text');
+function setSyncStatus(cls, text) {
+  syncPillEl.className = 'sync-pill ' + cls;
+  syncTextEl.textContent = text;
+}
+// Refresh "synced 5s ago" text periodically
+setInterval(() => {
+  if (lastSyncedAt && !isSyncing && isConfigured()) {
+    setSyncStatus('synced', `Synced ${formatTimeAgo(lastSyncedAt)}`);
+  }
+}, 15000);
+
+// =====================================================================
+// TOAST
+// =====================================================================
+const toastEl = document.getElementById('toast');
+function showToast(text, isError) {
+  toastEl.textContent = text;
+  toastEl.className = 'toast show' + (isError ? ' error' : '');
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(() => toastEl.className = 'toast', 2400);
+}
+
+// =====================================================================
+// RENDERING
+// =====================================================================
+function escapeHtml(s) { return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function docLink(filename) {
+  if (cfg.owner && cfg.repo) {
+    return `https://github.com/${cfg.owner}/${cfg.repo}/blob/${cfg.branch}/docs/${filename}`;
+  }
+  return `../docs/${filename}`;
+}
+
+function renderTodos(filter) {
+  const pane = document.getElementById('todos-pane');
+  pane.innerHTML = '';
+  const f = (filter || '').toLowerCase().trim();
+  let totalShown = 0;
+  PHASES.forEach(phase => {
+    const phaseTodos = TODOS.filter(t => t.phase === phase.id);
+    const matchedTodos = f
+      ? phaseTodos.filter(t => t.title.toLowerCase().includes(f) || (t.summary || '').toLowerCase().includes(f))
+      : phaseTodos;
+    if (f && matchedTodos.length === 0) return;
+    const phaseDiv = document.createElement('div');
+    phaseDiv.className = 'phase' + (state.collapsed[phase.id] && !f ? ' collapsed' : '');
+    const completedInPhase = phaseTodos.filter(t => state.completed[t.id]).length;
+    phaseDiv.innerHTML = `
+      <div class="phase-head" data-phase="${phase.id}">
+        <div><span class="chev">▼</span><span class="phase-title">${escapeHtml(phase.label)}</span></div>
+        <div class="phase-meta">${completedInPhase} / ${phaseTodos.length}</div>
+      </div>
+      <div class="phase-body"></div>
+    `;
+    const body = phaseDiv.querySelector('.phase-body');
+    matchedTodos.forEach(t => {
+      const div = document.createElement('div');
+      const isCompleted = !!state.completed[t.id];
+      const isActive = state.activeTodo === t.id;
+      div.className = 'todo' + (isCompleted ? ' completed' : '') + (isActive ? ' active' : '');
+      div.dataset.todoId = t.id;
+      div.innerHTML = `
+        <div class="checkbox ${isCompleted ? 'checked' : ''}" data-checkbox="${t.id}">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3,8 7,12 13,4"/></svg>
+        </div>
+        <div class="todo-body">
+          <div class="todo-title">${escapeHtml(t.title)}${t.special === 'interview-questions' ? '<span class="todo-badge">guide</span>' : ''}</div>
+          <div class="todo-meta">
+            <span>${escapeHtml(t.owner)}</span>
+            <span>·</span>
+            <span>${escapeHtml(t.duration)}</span>
+          </div>
+        </div>
+      `;
+      body.appendChild(div);
+      totalShown++;
+    });
+    pane.appendChild(phaseDiv);
+  });
+  if (totalShown === 0) {
+    pane.innerHTML = '<div class="empty-search">No todos match "' + escapeHtml(f) + '"</div>';
+  }
+  updateProgress();
+}
+
+function renderEmptyDetail() {
+  const pane = document.getElementById('detail-pane');
+  const notConfiguredBanner = !isConfigured() ? `
+    <div class="warn-banner"><strong>Progress is local-only right now.</strong> Click <strong>Sync settings</strong> to connect this dashboard to your GitHub repo. Once connected, every checkbox change is auto-saved to GitHub so it survives switching machines and 8 months from now.</div>
+  ` : '';
+  pane.innerHTML = `
+    <div class="detail-empty">
+      <h2>Welcome to your LifeOS build dashboard.</h2>
+      <p>This is the day-to-day operating surface for the LifeOS v1 build. Every todo on the left maps to a workstream in the Master Plan. Click any todo to read its detail — what to do, who owns it, what "done" looks like, what could go wrong.</p>
+      <p style="margin-top: 12px;">The plan is sequenced in seven phases over twelve months. Phase 0 — the de-risk week — is what you start with on Monday.</p>
+      ${notConfiguredBanner}
+      <div class="tip"><strong>Tip.</strong> The "Conduct 15 user interviews" todo opens the full interview guide inline. Use it as a field tool.</div>
+      <div class="links">
+        <a class="link-btn primary" href="${docLink('Master-Plan.md')}" target="_blank">Open Master Plan</a>
+        <a class="link-btn" href="${docLink('v1-Product-Spec.md')}" target="_blank">Open v1 Spec</a>
+        <a class="link-btn" href="${docLink('Interview-Questions.md')}" target="_blank">Open Interview Guide</a>
+      </div>
+    </div>
+  `;
+}
+
+function renderDetail(todoId) {
+  const pane = document.getElementById('detail-pane');
+  if (!todoId) { renderEmptyDetail(); return; }
+  const t = TODOS.find(x => x.id === todoId);
+  if (!t) return;
+  const phase = PHASES.find(p => p.id === t.phase);
+  const isCompleted = !!state.completed[t.id];
+
+  let interviewHtml = '';
+  if (t.special === 'interview-questions') {
+    const sections = [];
+    let currentSec = null;
+    INTERVIEW_GUIDE.forEach(item => {
+      if (item.type === 'section') {
+        if (currentSec) sections.push(currentSec);
+        currentSec = { ...item, items: [] };
+      } else {
+        if (!currentSec) currentSec = { type: 'section', title: 'Opening', time: '2 min', items: [] };
+        currentSec.items.push(item);
+      }
+    });
+    if (currentSec) sections.push(currentSec);
+    interviewHtml = `
+      <div class="iq-block">
+        <div class="iq-head">
+          <div>
+            <div class="iq-head-title">Interview Guide — Full Script</div>
+            <div class="iq-head-sub">22 questions across 5 sections · 30-min total · use the same script for every interview</div>
+          </div>
+          <div class="iq-actions">
+            <button class="iq-copy" id="iq-copy-btn">Copy all questions</button>
+          </div>
+        </div>
+        <div class="iq-body">
+          ${sections.map(sec => `
+            <div class="iq-section">
+              <div class="iq-section-title">${escapeHtml(sec.title)}${sec.time ? `<span class="iq-section-time">${escapeHtml(sec.time)}</span>` : ''}</div>
+              ${sec.items.map(it => {
+                if (it.type === 'q') return `<div class="iq-q"><span class="iq-q-num">${it.n}.</span><span>${escapeHtml(it.text)}${it.emphasis ? ' <em style="color:var(--accent);">(most important question)</em>' : ''}</span></div>`;
+                if (it.type === 'script') return `<div class="iq-script">${escapeHtml(it.text)}</div>`;
+                if (it.type === 'note') return `<div class="iq-note">${escapeHtml(it.text)}</div>`;
+                return '';
+              }).join('')}
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  pane.innerHTML = `
+    <div class="detail-head">
+      <div class="detail-phase">${escapeHtml(phase.label)}</div>
+      <div class="detail-title">${escapeHtml(t.title)}</div>
+      <div class="detail-summary">${escapeHtml(t.summary || '')}</div>
+    </div>
+    <div class="facts">
+      <div><div class="fact-label">Owner</div><div class="fact-value">${escapeHtml(t.owner)}</div></div>
+      <div><div class="fact-label">Duration</div><div class="fact-value">${escapeHtml(t.duration)}</div></div>
+      <div><div class="fact-label">Status</div><div class="fact-value">${isCompleted ? '<span style="color:var(--success);font-weight:600;">Completed</span>' : '<span style="color:var(--warn);font-weight:600;">In progress</span>'}</div></div>
+    </div>
+    <div class="section"><h3>Activities</h3><p>${escapeHtml(t.activities)}</p></div>
+    <div class="section"><h3>Success criteria</h3><p>${escapeHtml(t.success)}</p></div>
+    <div class="section"><h3>Deliverable</h3><p>${escapeHtml(t.deliverable)}</p></div>
+    <div class="section"><h3>Risk &amp; mitigation</h3><p>${escapeHtml(t.risk)}</p></div>
+    ${interviewHtml}
+    <div class="links">
+      <a class="link-btn primary" href="${docLink('Master-Plan.md')}" target="_blank">Open in Master Plan</a>
+      ${t.special === 'interview-questions' ? `<a class="link-btn" href="${docLink('Interview-Questions.md')}" target="_blank">Open full Interview Guide doc</a>` : ''}
+    </div>
+  `;
+
+  if (t.special === 'interview-questions') {
+    const btn = document.getElementById('iq-copy-btn');
+    if (btn) btn.addEventListener('click', () => {
+      const all = INTERVIEW_GUIDE
+        .filter(i => i.type === 'q' || i.type === 'section' || i.type === 'script')
+        .map(i => {
+          if (i.type === 'section') return `\n--- ${i.title} (${i.time}) ---`;
+          if (i.type === 'script') return `\n[Opening: ${i.text}]\n`;
+          return `${i.n}. ${i.text}`;
+        }).join('\n');
+      navigator.clipboard.writeText(all).then(() => showToast('Interview questions copied'));
+    });
+  }
+}
+
+function updateProgress() {
+  const total = TODOS.length;
+  const done = TODOS.filter(t => state.completed[t.id]).length;
+  const pct = total ? Math.round((done / total) * 100) : 0;
+  document.getElementById('progress-text').textContent = `${done} / ${total}`;
+  document.getElementById('progress-percent').textContent = `${pct}%`;
+  document.getElementById('progress-fill').style.width = pct + '%';
+}
+
+// =====================================================================
+// EVENT HANDLERS
+// =====================================================================
+document.getElementById('todos-pane').addEventListener('click', (e) => {
+  const cb = e.target.closest('[data-checkbox]');
+  if (cb) {
+    const id = cb.dataset.checkbox;
+    state.completed[id] = !state.completed[id];
+    persistLocal();
+    scheduleSync();
+    renderTodos(document.getElementById('search').value);
+    if (state.activeTodo === id) renderDetail(id);
+    e.stopPropagation();
+    return;
+  }
+  const head = e.target.closest('.phase-head');
+  if (head) {
+    const id = head.dataset.phase;
+    state.collapsed[id] = !state.collapsed[id];
+    persistLocal();
+    scheduleSync();
+    renderTodos(document.getElementById('search').value);
+    return;
+  }
+  const td = e.target.closest('[data-todo-id]');
+  if (td) {
+    state.activeTodo = td.dataset.todoId;
+    persistLocal();
+    scheduleSync();
+    renderTodos(document.getElementById('search').value);
+    renderDetail(state.activeTodo);
+  }
+});
+
+document.getElementById('search').addEventListener('input', (e) => {
+  renderTodos(e.target.value);
+});
+
+document.getElementById('reset-progress').addEventListener('click', () => {
+  if (confirm('Reset all progress? This clears all checkboxes locally AND on GitHub. The plan itself stays the same.')) {
+    state = { completed: {}, collapsed: {}, activeTodo: null, updatedAt: new Date().toISOString() };
+    persistLocal();
+    syncToRemote();
+    renderTodos('');
+    renderEmptyDetail();
+    showToast('Progress reset');
+  }
+});
+
+// =====================================================================
+// SETTINGS MODAL
+// =====================================================================
+const modal = document.getElementById('settings-modal');
+const modalStatus = document.getElementById('modal-status');
+const cfgOwner = document.getElementById('cfg-owner');
+const cfgRepo = document.getElementById('cfg-repo');
+const cfgBranch = document.getElementById('cfg-branch');
+const cfgPat = document.getElementById('cfg-pat');
+const cfgPatShow = document.getElementById('cfg-pat-show');
+
+function openSettings() {
+  cfgOwner.value = cfg.owner || '';
+  cfgRepo.value = cfg.repo || 'lifeos';
+  cfgBranch.value = cfg.branch || 'main';
+  cfgPat.value = cfg.pat || '';
+  modalStatus.style.display = 'none';
+  modal.classList.add('show');
+  setTimeout(() => cfgOwner.focus(), 50);
+}
+function closeSettings() {
+  modal.classList.remove('show');
+}
+function showModalStatus(text, kind) {
+  modalStatus.textContent = text;
+  modalStatus.className = 'modal-status ' + (kind || '');
+  modalStatus.style.display = 'block';
+}
+
+document.getElementById('settings-btn').addEventListener('click', openSettings);
+document.getElementById('cfg-cancel').addEventListener('click', closeSettings);
+modal.addEventListener('click', (e) => { if (e.target === modal) closeSettings(); });
+
+cfgPatShow.addEventListener('click', () => {
+  if (cfgPat.type === 'password') { cfgPat.type = 'text'; cfgPatShow.textContent = 'Hide'; }
+  else { cfgPat.type = 'password'; cfgPatShow.textContent = 'Show'; }
+});
+
+document.getElementById('cfg-disconnect').addEventListener('click', () => {
+  if (confirm('Disconnect from GitHub? Progress stays in this browser only.')) {
+    cfg = { owner: '', repo: 'lifeos', branch: 'main', pat: '' };
+    persistCfg();
+    stateSha = null;
+    lastSyncedAt = null;
+    setSyncStatus('offline', 'Not connected');
+    renderEmptyDetail();
+    closeSettings();
+    showToast('Disconnected from GitHub');
+  }
+});
+
+document.getElementById('cfg-save').addEventListener('click', async () => {
+  const newCfg = {
+    owner: cfgOwner.value.trim(),
+    repo: cfgRepo.value.trim() || 'lifeos',
+    branch: cfgBranch.value.trim() || 'main',
+    pat: cfgPat.value.trim(),
+  };
+  if (!newCfg.owner || !newCfg.repo || !newCfg.pat) {
+    showModalStatus('Owner, repo, and PAT are all required.', 'error');
+    return;
+  }
+  showModalStatus('Testing connection…', 'warn');
+  cfg = newCfg;
+  try {
+    // Test: try to fetch the repo metadata
+    const res = await ghRequest(`/repos/${cfg.owner}/${cfg.repo}`);
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(`${res.status}: ${err.message || 'Could not access repo'}`);
+    }
+    // Now fetch (or note absence of) the state file
+    const remote = await fetchRemoteState();
+    if (remote) {
+      // Merge: prefer remote since it represents the authoritative state
+      state = Object.assign(state, remote);
+      persistLocal();
+      renderTodos('');
+      renderDetail(state.activeTodo);
+      showModalStatus('Connected. Remote state loaded.', 'success');
+    } else {
+      // File doesn't exist on GitHub yet — push current local state
+      await pushRemoteState();
+      showModalStatus('Connected. Initial state pushed to GitHub.', 'success');
+    }
+    persistCfg();
+    lastSyncedAt = new Date();
+    setSyncStatus('synced', `Synced ${formatTimeAgo(lastSyncedAt)}`);
+    setTimeout(closeSettings, 1200);
+  } catch (e) {
+    console.error(e);
+    showModalStatus('Could not connect: ' + e.message, 'error');
+    setSyncStatus('error', 'Connection failed');
+  }
+});
+
+// =====================================================================
+// INIT
+// =====================================================================
+async function init() {
+  loadCfg();
+  loadLocalState();
+  renderTodos('');
+  renderDetail(state.activeTodo);
+
+  if (isConfigured()) {
+    setSyncStatus('syncing', 'Connecting…');
+    try {
+      const remote = await fetchRemoteState();
+      if (remote) {
+        // Remote wins on load — it represents the authoritative state across machines
+        state = Object.assign({ completed: {}, collapsed: {}, activeTodo: null }, remote);
+        persistLocal();
+        renderTodos('');
+        renderDetail(state.activeTodo);
+      } else {
+        // File doesn't exist on GitHub yet — push current local state
+        await pushRemoteState();
+      }
+      lastSyncedAt = new Date();
+      setSyncStatus('synced', `Synced ${formatTimeAgo(lastSyncedAt)}`);
+    } catch (e) {
+      console.error('Init sync error:', e);
+      setSyncStatus('error', 'Sync failed — check token');
+      showToast('Could not sync with GitHub: ' + e.message, true);
+    }
+  } else {
+    setSyncStatus('offline', 'Not connected');
+  }
+}
+
+init();
+</script>
+</body>
+</html>

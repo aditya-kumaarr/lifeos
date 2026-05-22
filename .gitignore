@@ -1,0 +1,41 @@
+# OS files
+.DS_Store
+Thumbs.db
+.AppleDouble
+.LSOverride
+desktop.ini
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Node (for when /app is built)
+node_modules/
+.npm
+.eslintcache
+.cache
+
+# Build artifacts (placeholders for /app phase)
+dist/
+build/
+out/
+*.log
+.env
+.env.local
+.env.*.local
+
+# Python (in case any tools end up Python-based)
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# OneDrive sync metadata
+.tmp.drivedownload
+~$*
+
+# OS thumbnails
+._*
