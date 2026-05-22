@@ -36,9 +36,12 @@ This moment is intentionally universal. It applies to a founder pitching investo
 | **Obsidian** | The reference design for personal knowledge graphs | No AI capture. Requires manual linking. Steep learning curve. Not for "everyone." |
 | **Notion** | Flexible workspace, broad surface area | No real meeting capture. AI is bolt-on. Graph view is a toy. Slow. |
 | **Mem / Tana / Reflect** | Reaching for "second brain + AI" | None has nailed meeting capture. Small followings. Fragmented features. |
+| **Capacities** | Object-based PKM done elegantly. Every note is a typed object (Person, Book, Place, Idea, Project); the graph emerges as you reference objects inside other objects. Beautiful native apps, calm UX, devoted user base. | No AI meeting capture — the user manually classifies every object. The graph is *yours to maintain*, not auto-built. No transcription, no Zoom integration, no cross-app modules. |
 | **Otter / Fireflies / Read.ai** | Enterprise meeting transcription | Boring outputs, bot-in-the-meeting model, no personal-brain layer |
 
 **The gap LifeOS fills:** AI-native capture + personal graph + everyday cross-app modules, in one product, at a price an individual will pay.
+
+> **Note on Capacities specifically.** Their object model (typed nodes: Person, Project, Idea, etc.) is the closest existing approximation to what our entity-extraction layer in Section 9 produces automatically. The strategic positioning against them writes itself: *"Capacities, except your meetings build the graph for you."* Their visual graph implementation is also the cleanest in any consumer app on the market and is worth studying as a design reference for our v2 graph view.
 
 ---
 
