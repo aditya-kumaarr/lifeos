@@ -1,1 +1,8 @@
-{"completed":{},"collapsed":{},"activeTodo":null,"updatedAt":null}
+{
+  "completed": {
+    "p0-1": true
+  },
+  "collapsed": {},
+  "activeTodo": null,
+  "updatedAt": "2026-05-22T20:29:48.514Z"
+}
