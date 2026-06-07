@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
 <meta http-equiv="Pragma" content="no-cache" />
 <meta http-equiv="Expires" content="0" />
-<title>LifeOS — Build Dashboard</title>
+<title>Sevri — Build Dashboard</title>
 <style>
 :root {
   color-scheme: light;
@@ -241,7 +241,7 @@ main.split { flex: 1; display: flex; overflow: hidden; }
   <header class="top">
     <div class="top-row">
       <div>
-        <h1>LifeOS — Build Dashboard</h1>
+        <h1>Sevri — Build Dashboard</h1>
         <div class="subtitle">Click any todo to see the detailed plan section. Tick the box when done. Progress syncs to GitHub.</div>
       </div>
       <div class="header-right">
@@ -283,7 +283,7 @@ main.split { flex: 1; display: flex; overflow: hidden; }
     </div>
     <div class="field">
       <label>Repo name</label>
-      <input type="text" id="cfg-repo" placeholder="lifeos" autocomplete="off" />
+      <input type="text" id="cfg-repo" placeholder="sevri" autocomplete="off" />
     </div>
     <div class="field">
       <label>Branch</label>
@@ -295,7 +295,7 @@ main.split { flex: 1; display: flex; overflow: hidden; }
         <input type="password" id="cfg-pat" placeholder="ghp_…" autocomplete="off" />
         <button class="show-btn" id="cfg-pat-show" type="button">Show</button>
       </div>
-      <div class="field-hint">Generate at <a href="https://github.com/settings/tokens/new?scopes=repo&description=LifeOS%20Dashboard" target="_blank" rel="noopener">github.com/settings/tokens</a> with the <strong>repo</strong> scope. Token stays only in this browser's localStorage — never sent anywhere except GitHub.</div>
+      <div class="field-hint">Generate at <a href="https://github.com/settings/tokens/new?scopes=repo&description=Sevri%20Dashboard" target="_blank" rel="noopener">github.com/settings/tokens</a> with the <strong>repo</strong> scope. Token stays only in this browser's localStorage — never sent anywhere except GitHub.</div>
     </div>
     <div class="modal-status" id="modal-status" style="display:none;"></div>
     <div class="modal-actions">
@@ -326,11 +326,11 @@ const PHASES = [
 ];
 
 const TODOS = [
-  { id: 'p0-1', phase: 'p0', title: 'Lock the name — trademark + domain checks', owner: 'Ops / Founder', duration: '2 days', summary: 'Confirm "LifeOS" is legally available and a domain is secured — or fall back to Plan B before any design or marketing work begins.', activities: 'Run "LifeOS" through trademark databases — USPTO (US), EUIPO (Europe), Indian Trademark Registry. Check domain availability across lifeos.com / .app / .io / .ai. If unavailable, fall back to the shortlist (Cortex / Trace / Index / Loop / Ground) and repeat.', success: 'Name confirmed available in target markets, primary domain secured (or strong alternative locked in).', deliverable: 'One-page decision doc with screenshots of search results and the final name + domain.', risk: '"LifeOS" is descriptive enough that some variant is taken. Have Plan B and Plan C ready before Monday morning so we don\'t lose a day.' },
+  { id: 'p0-1', phase: 'p0', title: 'Lock the name — trademark + domain checks', owner: 'Ops / Founder', duration: '2 days', summary: 'Confirm "Sevri" is legally available and a domain is secured — or fall back to Plan B before any design or marketing work begins.', activities: 'Run "Sevri" through trademark databases — USPTO (US), EUIPO (Europe), Indian Trademark Registry. Check domain availability across sevri.com / .app / .io / .ai. If unavailable, fall back to the shortlist (Cortex / Trace / Index / Loop / Ground) and repeat.', success: 'Name confirmed available in target markets, primary domain secured (or strong alternative locked in).', deliverable: 'One-page decision doc with screenshots of search results and the final name + domain.', risk: '"Sevri" is descriptive enough that some variant is taken. Have Plan B and Plan C ready before Monday morning so we don\'t lose a day.' },
   { id: 'p0-2', phase: 'p0', title: 'Recruit 15 user interview participants', owner: 'Founder + Designer', duration: '2–3 days', summary: 'Source a stress-test cohort spanning founders, sales reps, students, consultants, and high-confidentiality professionals.', activities: 'Recruit across archetypes — 3 founders, 3 sales reps, 3 students, 3 consultants/freelancers, 3 doctors/therapists/lawyers. Mix Indian and non-Indian users; at least 8 Indian users to stress-test the Hindi-English angle. Source from personal network, communities, LinkedIn.', success: '15 interviews booked on calendar within 3 days.', deliverable: 'Calendar slots, signed (verbal) consent for recording, archetype label per participant.', risk: 'Founder network bias. Mitigation: actively recruit outside your bubble (target ≥7 non-founders).' },
   { id: 'p0-3', phase: 'p0', title: 'Conduct 15 user interviews', owner: 'Founder + Designer', duration: '5 days (parallel with recruitment)', summary: 'Run the 30-minute script across all 15 conversations. Listen, don\'t pitch.', special: 'interview-questions', activities: 'Use the Interview Guide exactly — same script across all 15 to keep synthesis comparable. Record with consent. Designer takes notes; founder leads the conversation. Five-minute synthesis after each call while memory is fresh.', success: 'All 15 interviews completed with recordings + notes.', deliverable: '15 interview notes + audio recordings stored in a shared folder.', risk: 'Confirmation bias. Mitigation: the designer asks the cold follow-up questions; share notes daily with the engineer doing the technical spike.' },
   { id: 'p0-4', phase: 'p0', title: 'Synthesize interview findings', owner: 'Founder + Designer', duration: '1 day end of Week 1', summary: 'Distill 15 interviews into 5 themes, 5 quotes, a segment heatmap, and a go/pivot/kill recommendation.', activities: 'Pull patterns from daily notes. Identify the top 5 themes — what kept coming up. Pull 5 verbatim quotes. Build a segment heatmap. Recommend: build as is, pivot to narrower v1, or kill.', success: 'Clear signal on whether the "meeting moment" is universal or one segment dominates.', deliverable: 'Synthesis doc with themes, quotes, heatmap, and go/pivot/kill recommendation.', risk: 'Patterns are muddy — 15 isn\'t enough. Mitigation: if weak, run 5 more in Week 2 before deciding.' },
-  { id: 'p0-5', phase: 'p0', title: 'Run transcription quality spike', owner: '1 senior engineer', duration: '5 days', summary: 'Prove (or disprove) that off-the-shelf ASR can handle Indian English and Hinglish at our quality bar before we commit to v1.', activities: 'Record 10 meetings spanning conditions LifeOS must handle — 3 Indian-English Zoom, 2 Hindi-English code-switched, 2 noisy in-person, 2 US-English video, 1 lecture. Run each through Deepgram Nova-2, AssemblyAI Universal-2, and Whisper-large-v3. Hand-label 5-minute segments and compute WER.', success: 'At least one provider hits <8% WER on Indian English and <10% on Hindi-English code-switching.', deliverable: 'One-page comparison table + recommendation memo + the 10 recordings retained for regression testing.', risk: 'All three providers weak — adds 6–8 weeks for own-model fine-tune. Point of the spike is to learn this now.' },
+  { id: 'p0-5', phase: 'p0', title: 'Run transcription quality spike', owner: '1 senior engineer', duration: '5 days', summary: 'Prove (or disprove) that off-the-shelf ASR can handle Indian English and Hinglish at our quality bar before we commit to v1.', activities: 'Record 10 meetings spanning conditions Sevri must handle — 3 Indian-English Zoom, 2 Hindi-English code-switched, 2 noisy in-person, 2 US-English video, 1 lecture. Run each through Deepgram Nova-2, AssemblyAI Universal-2, and Whisper-large-v3. Hand-label 5-minute segments and compute WER.', success: 'At least one provider hits <8% WER on Indian English and <10% on Hindi-English code-switching.', deliverable: 'One-page comparison table + recommendation memo + the 10 recordings retained for regression testing.', risk: 'All three providers weak — adds 6–8 weeks for own-model fine-tune. Point of the spike is to learn this now.' },
   { id: 'p0-6', phase: 'p0', title: 'Make the Go / Pivot / Kill call', owner: 'Founder', duration: 'End of Week 1', summary: 'Based on the outputs of all three Phase 0 workstreams, make a single, documented decision.', activities: 'Review all three Phase 0 outputs. Confirm name is locked. Confirm interview synthesis supports the moment. Confirm transcription quality is reachable. Make the call.', success: 'Decision documented in writing and shared with team.', deliverable: 'One-paragraph decision memo with reasoning.', risk: 'Wishful thinking. Mitigation: invite designer and lead engineer to a 60-minute meeting where each has veto.' },
 
   { id: 'p1-1', phase: 'p1', title: 'Revise v1 Product Spec based on Phase 0', owner: 'Founder + Designer', duration: '3 days', summary: 'Edit the spec ruthlessly against what Phase 0 actually showed.', activities: 'Review the v1 spec against Phase 0 findings. Edit every section that contradicts what users actually said. Strengthen the anti-scope. Update the default note template if needed.', success: 'No section of the spec contradicts what users said in interviews.', deliverable: 'Spec v0.2, signed off by founder + designer + lead engineer.', risk: 'Scope creep — every interview generates a feature idea. Anti-scope is the rule.' },
@@ -364,7 +364,7 @@ const TODOS = [
   { id: 'p4-3', phase: 'p4', title: 'Run weekly beta interviews (5/week)', owner: 'Founder + Designer', duration: 'Throughout Month 5', summary: 'Five 30-minute calls per week, rotating archetypes.', activities: 'Ask about specific recent meetings. Add to running synthesis daily.', success: 'Weekly themes feed bug triage and next-sprint planning.', deliverable: '20+ beta interviews with structured synthesis.', risk: 'Interview fatigue. Batch on 2 days/week.' },
   { id: 'p4-4', phase: 'p4', title: 'Daily bug triage', owner: 'Lead engineer', duration: 'Throughout Month 5', summary: '"This is wrong" reports triage within 24 hours.', activities: 'Daily standup. Track in one channel.', success: 'Mean time to triage <24h; high-priority fix <72h.', deliverable: 'Bug board with throughput.', risk: 'Bug backlog overwhelming feature work. Weekly bug-to-feature ratio review.' },
 
-  { id: 'p5-1', phase: 'p5', title: 'Build Todo tab', owner: 'Engineer + Designer', duration: '~4 weeks (Months 5–6)', summary: 'Action items from meetings become first-class todos. Manual todos too.', activities: 'Build the tab with auto-flow from meetings, manual creation, filters.', success: 'Users complete "meeting → action item → done" without leaving LifeOS.', deliverable: 'Todo tab with cross-tab linkage.', risk: 'Todo apps are mature. The meeting integration is the unique value.' },
+  { id: 'p5-1', phase: 'p5', title: 'Build Todo tab', owner: 'Engineer + Designer', duration: '~4 weeks (Months 5–6)', summary: 'Action items from meetings become first-class todos. Manual todos too.', activities: 'Build the tab with auto-flow from meetings, manual creation, filters.', success: 'Users complete "meeting → action item → done" without leaving Sevri.', deliverable: 'Todo tab with cross-tab linkage.', risk: 'Todo apps are mature. The meeting integration is the unique value.' },
   { id: 'p5-2', phase: 'p5', title: 'Build Expense tab', owner: 'Engineer + Designer', duration: '~3 weeks (Month 6)', summary: 'Amounts mentioned in meetings become pending expense entries.', activities: 'Build the tab with auto-flow from meetings, manual entry, monthly view.', success: 'Users review pending expenses without missing a discussed amount.', deliverable: 'Expense tab with auto-flow + manual entry.', risk: 'Mature category. Same: meeting integration is the wedge.' },
   { id: 'p5-3', phase: 'p5', title: 'Port to Windows', owner: 'Engineer (Windows)', duration: '~6 weeks (Months 5–7)', summary: 'Match Mac feature parity. Audio capture via WASAPI.', activities: 'WASAPI audio capture. UI parity with Mac. Test against Phase 0 conditions.', success: 'Windows users get same v1+v1.5 experience as Mac.', deliverable: 'Windows app at parity.', risk: 'Cross-platform UI drift. Shared component library; visual diff tests.' },
   { id: 'p5-4', phase: 'p5', title: 'Build entity resolution UI', owner: 'Engineer + Designer', duration: '~1 week (Month 6)', summary: 'Let users merge duplicate people/projects/topics.', activities: 'Settings-level entity browser. Show duplicates. One-click merge with undo.', success: 'Users resolve dupes in <30s per pair.', deliverable: 'Entity resolution in Settings.', risk: 'Merging is destructive — ensure undo.' },
@@ -421,13 +421,13 @@ const INTERVIEW_GUIDE = [
 // =====================================================================
 // STATE MANAGEMENT — local first, then GitHub sync
 // =====================================================================
-const LOCAL_KEY = 'lifeos-dashboard-v2';
-const CFG_KEY = 'lifeos-dashboard-cfg-v1';
+const LOCAL_KEY = 'sevri-dashboard-v2';
+const CFG_KEY = 'sevri-dashboard-cfg-v1';
 const STATE_PATH = 'state/dashboard-state.json';
 
 let state = { completed: {}, collapsed: {}, activeTodo: null, updatedAt: null };
 // Defaults pre-filled for this repo so the user only ever needs the PAT.
-let cfg = { owner: 'aditya-kumaarr', repo: 'lifeos', branch: 'main', pat: '' };
+let cfg = { owner: 'aditya-kumaarr', repo: 'sevri', branch: 'main', pat: '' };
 let stateSha = null; // SHA of the current state file on GitHub
 let saveTimer = null;
 let isSyncing = false;
@@ -669,8 +669,8 @@ function renderEmptyDetail() {
   ` : '';
   pane.innerHTML = `
     <div class="detail-empty">
-      <h2>Welcome to your LifeOS build dashboard.</h2>
-      <p>This is the day-to-day operating surface for the LifeOS v1 build. Every todo on the left maps to a workstream in the Master Plan. Click any todo to read its detail — what to do, who owns it, what "done" looks like, what could go wrong.</p>
+      <h2>Welcome to your Sevri build dashboard.</h2>
+      <p>This is the day-to-day operating surface for the Sevri v1 build. Every todo on the left maps to a workstream in the Master Plan. Click any todo to read its detail — what to do, who owns it, what "done" looks like, what could go wrong.</p>
       <p style="margin-top: 12px;">The plan is sequenced in seven phases over twelve months. Phase 0 — the de-risk week — is what you start with on Monday.</p>
       ${notConfiguredBanner}
       <div class="tip"><strong>Tip.</strong> The "Conduct 15 user interviews" todo opens the full interview guide inline. Use it as a field tool.</div>
@@ -841,7 +841,7 @@ const cfgPatShow = document.getElementById('cfg-pat-show');
 
 function openSettings() {
   cfgOwner.value = cfg.owner || '';
-  cfgRepo.value = cfg.repo || 'lifeos';
+  cfgRepo.value = cfg.repo || 'sevri';
   cfgBranch.value = cfg.branch || 'main';
   cfgPat.value = cfg.pat || '';
   modalStatus.style.display = 'none';
@@ -868,7 +868,7 @@ cfgPatShow.addEventListener('click', () => {
 
 document.getElementById('cfg-disconnect').addEventListener('click', () => {
   if (confirm('Disconnect from GitHub? Progress stays in this browser only.')) {
-    cfg = { owner: '', repo: 'lifeos', branch: 'main', pat: '' };
+    cfg = { owner: '', repo: 'sevri', branch: 'main', pat: '' };
     persistCfg();
     stateSha = null;
     lastSyncedAt = null;
@@ -882,7 +882,7 @@ document.getElementById('cfg-disconnect').addEventListener('click', () => {
 document.getElementById('cfg-save').addEventListener('click', async () => {
   const newCfg = {
     owner: cfgOwner.value.trim(),
-    repo: cfgRepo.value.trim() || 'lifeos',
+    repo: cfgRepo.value.trim() || 'sevri',
     branch: cfgBranch.value.trim() || 'main',
     pat: cfgPat.value.trim(),
   };
@@ -939,7 +939,7 @@ async function init() {
     const token = decodeURIComponent(hash.substring(7)).trim();
     if (token && token.length > 10) {
       cfg.owner = cfg.owner || 'aditya-kumaarr';
-      cfg.repo = cfg.repo || 'lifeos';
+      cfg.repo = cfg.repo || 'sevri';
       cfg.branch = cfg.branch || 'main';
       cfg.pat = token;
       persistCfg();

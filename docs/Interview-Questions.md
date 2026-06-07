@@ -1,9 +1,9 @@
-# LifeOS — User Interview Guide
+# Sevri — User Interview Guide
 
 **Purpose:** The field tool for Phase 0 Workstream 0.2 (user research). Use this exact script across all 15 interviews so synthesis is comparable.
 **Owner of this doc:** Founder + designer.
 **Date:** 23 May 2026.
-**Related:** [Master Plan — Workstream 0.2](./LifeOS-Master-Plan.md), [v1 Product Spec](./LifeOS-v1-Product-Spec.md).
+**Related:** [Master Plan — Workstream 0.2](./Sevri-Master-Plan.md), [v1 Product Spec](./Sevri-v1-Product-Spec.md).
 
 ---
 

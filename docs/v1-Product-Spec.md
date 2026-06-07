@@ -1,8 +1,8 @@
-# LifeOS — v1 Product Spec
+# Sevri — v1 Product Spec
 
 **Status:** Draft v0.1
 **Date:** 23 May 2026
-**Working name:** LifeOS *(see Naming, end of doc)*
+**Working name:** Sevri *(see Naming, end of doc)*
 **Owner:** Founder + team
 **One-line pitch:** A personal knowledge brain whose primary input is your meetings — and whose long-term ambition is to be the single app where everything you capture, decide, owe, and remember lives in one connected graph.
 
@@ -12,7 +12,7 @@
 
 Today, the things you care about live in fragments. Meeting notes in Granola. Action items in Todoist. Expenses in a different app. Personal notes in Apple Notes. Long-form thinking in Obsidian. None of these talk to each other. Your brain is split across twelve apps and the connective tissue exists only inside your head.
 
-LifeOS is the opposite bet: **one app, one graph, one brain.** Every meeting, todo, expense, voice memo, and note becomes a node in a single personal knowledge graph that grows with you over months and years. The AI can answer questions across all of it. The modules feed each other automatically.
+Sevri is the opposite bet: **one app, one graph, one brain.** Every meeting, todo, expense, voice memo, and note becomes a node in a single personal knowledge graph that grows with you over months and years. The AI can answer questions across all of it. The modules feed each other automatically.
 
 We start with the meeting-capture module because it is the highest-density input source — one hour-long call can produce a week's worth of structured notes, action items, and decisions. Get capture right and the rest of the app has fuel.
 
@@ -20,7 +20,7 @@ We start with the meeting-capture module because it is the highest-density input
 
 ## 2. The Moment
 
-Every great consumer product is built around one moment of use. LifeOS v1 is built around this one:
+Every great consumer product is built around one moment of use. Sevri v1 is built around this one:
 
 > **"I am in, or just finished, a meeting — and I want my brain to have it perfectly captured and organized without lifting a finger."**
 
@@ -39,7 +39,7 @@ This moment is intentionally universal. It applies to a founder pitching investo
 | **Capacities** | Object-based PKM done elegantly. Every note is a typed object (Person, Book, Place, Idea, Project); the graph emerges as you reference objects inside other objects. Beautiful native apps, calm UX, devoted user base. | No AI meeting capture — the user manually classifies every object. The graph is *yours to maintain*, not auto-built. No transcription, no Zoom integration, no cross-app modules. |
 | **Otter / Fireflies / Read.ai** | Enterprise meeting transcription | Boring outputs, bot-in-the-meeting model, no personal-brain layer |
 
-**The gap LifeOS fills:** AI-native capture + personal graph + everyday cross-app modules, in one product, at a price an individual will pay.
+**The gap Sevri fills:** AI-native capture + personal graph + everyday cross-app modules, in one product, at a price an individual will pay.
 
 > **Note on Capacities specifically.** Their object model (typed nodes: Person, Project, Idea, etc.) is the closest existing approximation to what our entity-extraction layer in Section 9 produces automatically. The strategic positioning against them writes itself: *"Capacities, except your meetings build the graph for you."* Their visual graph implementation is also the cleanest in any consumer app on the market and is worth studying as a design reference for our v2 graph view.
 
@@ -75,7 +75,7 @@ This section matters more than Section 4. The temptation to bloat will be consta
 
 - **The visual graph view** (the "Obsidian galaxy"). The data layer exists; the UI is v2. Building a beautiful graph view is a 6-month project and we don't earn the right to it until we have users with months of meetings.
 - **Todo tab, Expense tab, any other module.** These are v1.5 and v2. v1 just lays the data hooks.
-- **Team / collaboration features.** No shared workspaces, no multi-user notes, no permissions. LifeOS v1 is single-player.
+- **Team / collaboration features.** No shared workspaces, no multi-user notes, no permissions. Sevri v1 is single-player.
 - **CRM-style relationship tracking.** Tempting but distracting. Defer to v2+.
 - **Custom AI prompts / templates.** v1 ships one excellent default. Configurability is a feature for power users we don't have yet.
 - **Integrations.** No Slack, no Salesforce, no Linear, no Notion sync. v1 is a closed loop: meeting in, structured note out.
@@ -93,7 +93,7 @@ Every design and engineering decision in v1 must serve one of these four pillars
 1. **Effortless capture.** From "click record" to "I have my notes" must feel like zero work. No bot joining. No setup per meeting. No formatting decisions.
 2. **Trustworthy intelligence.** The notes have to be right. Hallucination is fatal. The AI must say "I'm not sure" rather than invent a quote. Source-grounded everywhere.
 3. **Graph foundations.** Every entity extracted, every link formed, every meeting tagged — quietly building the user's personal graph from day one, even though it's invisible in v1.
-4. **Personal-brain feel.** LifeOS is *yours*. Single-player. Calm. Not a productivity tool that nags you. A second mind that remembers things so you don't have to.
+4. **Personal-brain feel.** Sevri is *yours*. Single-player. Calm. Not a productivity tool that nags you. A second mind that remembers things so you don't have to.
 
 ---
 
@@ -101,16 +101,16 @@ Every design and engineering decision in v1 must serve one of these four pillars
 
 ### 7.1 First-run
 
-App install → grant microphone + system audio permissions → optional Google/Microsoft calendar connect (so LifeOS knows when meetings start) → tutorial meeting (60 seconds, voiced) → home view.
+App install → grant microphone + system audio permissions → optional Google/Microsoft calendar connect (so Sevri knows when meetings start) → tutorial meeting (60 seconds, voiced) → home view.
 
 ### 7.2 Daily flow — the canonical journey
 
-1. **Pre-meeting.** Calendar event approaches. LifeOS surfaces a notification: *"Call with Priya in 5 min — add anything you want me to know?"* User can paste context or skip.
-2. **Meeting start.** User joins the Zoom/Meet/Teams call. LifeOS auto-detects and starts capturing (with a visible recording indicator — never silent). Or user clicks "Record" for in-person.
-3. **During the meeting.** A floating overlay shows live transcript + a few real-time bullets. User can mark moments ("flag this") or jot quick notes. Most users will close the overlay and ignore LifeOS during the call — that's fine.
+1. **Pre-meeting.** Calendar event approaches. Sevri surfaces a notification: *"Call with Priya in 5 min — add anything you want me to know?"* User can paste context or skip.
+2. **Meeting start.** User joins the Zoom/Meet/Teams call. Sevri auto-detects and starts capturing (with a visible recording indicator — never silent). Or user clicks "Record" for in-person.
+3. **During the meeting.** A floating overlay shows live transcript + a few real-time bullets. User can mark moments ("flag this") or jot quick notes. Most users will close the overlay and ignore Sevri during the call — that's fine.
 4. **Meeting ends.** Within 30–60 seconds, the structured note is ready. Notification: *"Your call with Priya is captured — 4 action items, 2 decisions."*
 5. **Review.** User opens the note. Reads. Edits anything wrong. Optionally clicks "Share" to send a public link to attendees.
-6. **Retrieval (hours / days / weeks later).** User opens LifeOS, types a question in the global chat: *"What did Priya commit to on the pricing question?"* LifeOS answers, cites the meeting, jumps to the moment in the transcript on click.
+6. **Retrieval (hours / days / weeks later).** User opens Sevri, types a question in the global chat: *"What did Priya commit to on the pricing question?"* Sevri answers, cites the meeting, jumps to the moment in the transcript on click.
 
 ### 7.3 Key screens
 
@@ -254,7 +254,7 @@ Ship the Notes module on Mac, end-to-end, polished. One module, done well. Hard 
 
 ### 12.1 Pricing thesis
 
-Granola is $18/mo, US-priced, US-centric. LifeOS undercuts globally and prices for India properly.
+Granola is $18/mo, US-priced, US-centric. Sevri undercuts globally and prices for India properly.
 
 - **Free tier** — 10 meetings/month, no global chat, no export. Acquisition engine.
 - **Pro** — $9/mo (US/EU), ₹599/mo (India), unlimited meetings, global chat, export, priority transcription. Annual discount.
@@ -262,7 +262,7 @@ Granola is $18/mo, US-priced, US-centric. LifeOS undercuts globally and prices f
 
 ### 12.2 Positioning vs Granola
 
-> "Granola captures your meetings. LifeOS remembers them — and connects them to everything else in your life."
+> "Granola captures your meetings. Sevri remembers them — and connects them to everything else in your life."
 
 The single sentence the homepage leads with. Every marketing asset flows from it.
 
@@ -318,9 +318,9 @@ Not an architecture doc — just decisions a PM / founder needs in their head.
 
 These are decisions we haven't made. Tag them, schedule them, don't let them rot.
 
-1. **Naming.** "LifeOS" is a placeholder. Candidates worth testing: *LifeOS, Cortex, Memo (taken), Loop, Ground, Index, Brain, Mind, Trace.* The name should evoke memory, foundation, or connectedness — not productivity. Trademark search required before commitment.
+1. **Naming.** "Sevri" is a placeholder. Candidates worth testing: *Sevri, Cortex, Memo (taken), Loop, Ground, Index, Brain, Mind, Trace.* The name should evoke memory, foundation, or connectedness — not productivity. Trademark search required before commitment.
 2. **Mac-first vs Mac-only?** Do we ship Windows at launch or 6 weeks later? Cost: ~2 engineer-months. Trade-off: India has lots of Windows users; Mac-only is a strong wedge in startup land but caps TAM.
-3. **Calendar integration depth.** Read-only (just to know when meetings happen) vs read-write (LifeOS creates follow-up events from action items). v1: read-only. Question: is read-write a v1.5 must-have or v2 nice-to-have?
+3. **Calendar integration depth.** Read-only (just to know when meetings happen) vs read-write (Sevri creates follow-up events from action items). v1: read-only. Question: is read-write a v1.5 must-have or v2 nice-to-have?
 4. **In-meeting AI vs only post-meeting?** Granola has live bullets. We propose the same. But should the AI suggest things to say in real-time ("you haven't asked about timeline")? Powerful but creepy. Defer to user testing.
 5. **Default note template.** We propose one fixed template in v1. Validate with 20 beta users that one template works across founders/sales/students/professionals. If it doesn't, we need template-per-context — and that's a meaningfully bigger v1.
 6. **Pricing in India — ₹599 or ₹399?** Granola is unpriced for India. We need price elasticity testing.
@@ -330,34 +330,38 @@ These are decisions we haven't made. Tag them, schedule them, don't let them rot
 
 ## 16. Naming
 
-Working name: **LifeOS.**
+**The product is Sevri.** Pronounced **SEV-ree** — two syllables, five letters, soft on the ear.
 
-The name does real work for the positioning. An operating system sits *beneath* every app — invisibly powering them, providing the file system, the memory, the process scheduler. That is precisely what LifeOS is to your life: invisible plumbing beneath your meetings, todos, expenses, and notes. It also reframes the product away from "another productivity app" into infrastructure — which is a much stronger positioning against Notion/Obsidian/Granola, all of which are surface-level apps.
+Sevri is a coined word — no prior English meaning, no cultural baggage, no incumbent owning the brand-space. That is exactly the property we want: a name we get to *give* meaning to through what we build, instead of inheriting whatever meaning competitors have already pasted onto a familiar word. Notion, Granola, Figma, Roam, Tana, Mem, Reflect, Slack, Stripe — every successful modern productivity product took this path.
 
-**Risks with the name:**
-- "LifeOS" is descriptive enough that several small apps have used variants of it. Trademark search required in India, US, EU before any public commitment.
-- The `.com` is almost certainly taken or expensive — `lifeos.app`, `lifeos.io`, `lifeos.ai`, or a coined alternative may be necessary.
-- "OS" framing sets a high bar — users will expect it to be foundational, not just useful. Live up to that bar or the name backfires.
+**Pronunciation works in every market we care about:** clear in English, clear in Hindi, no awkward consonant cluster anywhere. Reads exactly as spelled on first sight. Plays nicely in voice queries.
 
-**Alternatives to keep on the bench** in case trademark / domain force a change:
-- **Cortex** — biological, brain-y, slightly clinical.
-- **Trace** — implies record + thread.
-- **Index** — bookish, archive-y, understated.
-- **Loop** — implies the closed feedback (capture → recall → act).
-- **Ground** — foundational, grounded, calm.
+**Selection process** (full audit trail lives in [docs/Name-Decision.md](./Name-Decision.md)):
 
-Founder call. Action: run trademark + domain checks on "LifeOS" this week so we're not anchored on a name we can't legally own.
+- The working name was originally "LifeOS." Preliminary brand search killed it — 17 active products using the name, including direct AI-OS competitors.
+- 280+ candidate names were generated and screened across six rounds.
+- 32 finalists survived `.com`/`.ai` availability checks AND brand-collision verification.
+- Sevri was chosen for the strongest combination of brevity, pronunciation clarity, distinctive sound, and verified clean status.
+
+**Domain target:** `sevri.ai` — confirmed unregistered at time of selection.
+
+**Pre-launch action items:**
+- Lock `sevri.ai` at registrar immediately to prevent WHOIS-drop sniping.
+- Defensive registrations of `sevri.app`, `sevri.io`, `sevri.so` recommended (~$50 annually).
+- Formal trademark clearance by IP attorney in US/EU/India before any public-launch marketing.
+- App Store + Play Store developer-account name reservation during Phase 1.
+- Social handles: `@sevri` or `@sevriapp` on X / LinkedIn / Instagram — check and reserve in Week 1.
 
 ---
 
 ## 17. What "Done" Looks Like for v1
 
-A user who installs LifeOS on Monday should, by Friday:
+A user who installs Sevri on Monday should, by Friday:
 
 1. Have recorded 3+ meetings.
 2. Have had at least one moment of "wait, that's exactly what was said" delight.
 3. Have asked the global chat at least one question and gotten a useful, source-grounded answer.
-4. Have shared one meeting note with someone outside LifeOS.
+4. Have shared one meeting note with someone outside Sevri.
 5. Have at least one moment of frustration — something wrong, something missing — that we can talk to them about.
 
 If we hit those, v1 is a success, and we have the right to ship v1.5.

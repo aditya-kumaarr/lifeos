@@ -1,24 +1,24 @@
-# LifeOS — Master Build Plan
+# Sevri — Master Build Plan
 
 **Owner:** Founder + team
 **Version:** v0.1
 **Date:** 23 May 2026
 **Status:** Active — kick-off Monday
 **Related docs:**
-- [LifeOS v1 Product Spec](./LifeOS-v1-Product-Spec.md)
-- [LifeOS Interview Questions](./LifeOS-Interview-Questions.md)
-- LifeOS Build Dashboard *(interactive artifact)*
+- [Sevri v1 Product Spec](./Sevri-v1-Product-Spec.md)
+- [Sevri Interview Questions](./Sevri-Interview-Questions.md)
+- Sevri Build Dashboard *(interactive artifact)*
 
 ---
 
 ## Purpose
 
-This is the master execution plan for LifeOS. It turns the v1 Product Spec into sequenced work over twelve months. Every action that needs to happen — across product, design, engineering, research, operations, and go-to-market — lives somewhere in this plan.
+This is the master execution plan for Sevri. It turns the v1 Product Spec into sequenced work over twelve months. Every action that needs to happen — across product, design, engineering, research, operations, and go-to-market — lives somewhere in this plan.
 
 The plan is paired with two companion artifacts that you should keep open alongside it:
 
-1. **LifeOS Build Dashboard** — the interactive day-to-day UI. Each todo there maps to a workstream below; clicking a todo reveals the detailed plan content.
-2. **LifeOS Interview Questions** — the field guide used in the Phase 0 research workstream.
+1. **Sevri Build Dashboard** — the interactive day-to-day UI. Each todo there maps to a workstream below; clicking a todo reveals the detailed plan content.
+2. **Sevri Interview Questions** — the field guide used in the Phase 0 research workstream.
 
 The three documents are deliberately connected. The plan is the source of truth, the dashboard is how you work the plan daily, the interview guide is how you execute one specific workstream.
 
@@ -46,16 +46,16 @@ Phases compound. Skipping work in Phase 0 to "save time" causes pain in Phase 3.
 
 - **Owner:** Operations or founder (non-technical).
 - **Duration:** 2 days (Mon–Tue of Week 1).
-- **Activities:** Run "LifeOS" through trademark databases — USPTO (US), EUIPO (Europe), Indian Trademark Registry. Check domain availability across `lifeos.com / .app / .io / .ai`. If "LifeOS" is unavailable or weakly protectable, fall back to the Section 16 shortlist (Cortex / Trace / Index / Loop / Ground) and repeat checks for the chosen alternative.
+- **Activities:** Run "Sevri" through trademark databases — USPTO (US), EUIPO (Europe), Indian Trademark Registry. Check domain availability across `sevri.com / .app / .io / .ai`. If "Sevri" is unavailable or weakly protectable, fall back to the Section 16 shortlist (Cortex / Trace / Index / Loop / Ground) and repeat checks for the chosen alternative.
 - **Success criteria:** Name confirmed available in target markets, primary domain secured (or strong alternative locked in).
 - **Deliverable:** One-page decision doc with screenshots of search results and the final name + domain.
-- **Risk:** "LifeOS" is descriptive enough that some variant is taken. Have Plan B and Plan C ready before Monday morning so we don't lose a day.
+- **Risk:** "Sevri" is descriptive enough that some variant is taken. Have Plan B and Plan C ready before Monday morning so we don't lose a day.
 
 ### Workstream 0.2 — Validate the moment (User interviews)
 
 - **Owner:** Founder + designer.
 - **Duration:** 5 days (Mon–Fri of Week 1).
-- **Activities:** Recruit and conduct 15 user interviews across diverse archetypes — founders (3), sales reps (3), students (3), consultants (3), doctors / therapists / lawyers (3). Use the LifeOS Interview Guide. Record with consent, take notes, synthesize daily so patterns appear by mid-week.
+- **Activities:** Recruit and conduct 15 user interviews across diverse archetypes — founders (3), sales reps (3), students (3), consultants (3), doctors / therapists / lawyers (3). Use the Sevri Interview Guide. Record with consent, take notes, synthesize daily so patterns appear by mid-week.
 - **Success criteria:** Clear signal on whether the "meeting moment" from Section 2 of the spec is genuinely universal, or whether one segment is dramatically more underserved than the rest. By interview ten, patterns must be visible.
 - **Deliverable:** Synthesis doc with top 5 themes, top 5 verbatim quotes, segment heatmap, and a *go / pivot / kill* recommendation for v1.
 - **Risk:** Confirmation bias — founders hear what they want to hear. Mitigation: the designer asks the cold follow-up questions; the engineer doing the technical spike sanity-checks the synthesis.
@@ -64,7 +64,7 @@ Phases compound. Skipping work in Phase 0 to "save time" causes pain in Phase 3.
 
 - **Owner:** One senior engineer.
 - **Duration:** 5 days (Mon–Fri of Week 1).
-- **Activities:** Record 10 meetings spanning the conditions LifeOS must handle — 3 Indian-English Zoom calls, 2 Hindi-English code-switched calls, 2 noisy in-person meetings (mic only), 2 US-English video calls, 1 lecture/monologue. Run each through Deepgram Nova-2, AssemblyAI Universal-2, and Whisper-large-v3. Hand-label a 5-minute segment from each meeting and compute Word Error Rate (WER) per provider per condition.
+- **Activities:** Record 10 meetings spanning the conditions Sevri must handle — 3 Indian-English Zoom calls, 2 Hindi-English code-switched calls, 2 noisy in-person meetings (mic only), 2 US-English video calls, 1 lecture/monologue. Run each through Deepgram Nova-2, AssemblyAI Universal-2, and Whisper-large-v3. Hand-label a 5-minute segment from each meeting and compute Word Error Rate (WER) per provider per condition.
 - **Success criteria:** At least one provider achieves <8% WER on Indian English specifically, and <10% on Hindi-English code-switching. If none does, this is a v1-killing problem and we replan.
 - **Deliverable:** One-page comparison table + recommendation memo + the 10 recordings + transcripts retained for later regression testing.
 - **Risk:** All three providers are weak on Indian English. Fallback: fine-tune our own model (~6–8 weeks added to v1). The whole point of the spike is to discover this in Week 1, not in Month 3.
@@ -191,7 +191,7 @@ Build in this order. Resist the urge to parallel-stream more than the team can r
 ### Cross-cutting workstreams during Months 2–4
 
 - **Quality bar enforcement:** Hallucination rate <1%, time-to-note <60s median. Measure weekly; if either regresses, stop feature work until restored.
-- **Internal dogfooding:** Every team member uses LifeOS for their real meetings starting Month 3. Track bugs in a single channel.
+- **Internal dogfooding:** Every team member uses Sevri for their real meetings starting Month 3. Track bugs in a single channel.
 - **Beta list growth:** Founder keeps recruiting. Target 100 confirmed users by end of Month 4.
 
 ### Phase 3 — gate
@@ -255,7 +255,7 @@ End of Month 7: v1.5 is shippable. Pricing works in production. Three modules li
 
 ## Phase 7 — v2 horizon (Months 8–12)
 
-**Goal:** Build the moat — the visual graph, mobile companion, and standalone notes — that makes LifeOS the *only* app on a user's screen.
+**Goal:** Build the moat — the visual graph, mobile companion, and standalone notes — that makes Sevri the *only* app on a user's screen.
 
 ### Workstreams (sequence TBD based on what v1.5 data reveals)
 
@@ -303,11 +303,11 @@ These are decisions we haven't made. Each must have a target date for resolution
 - **Phase 0 done:** We've decided to build (or not).
 - **Phase 1 done:** A designer and an engineer can each describe v1 in one sentence using the same words.
 - **Phase 2 done:** Every epic has an owner and an estimate; build can start Monday.
-- **Phase 3 done:** The team has used LifeOS to capture their own meetings for four weeks and miss it when it's offline.
-- **Phase 4 done:** 100 strangers have used LifeOS, and at least 10 of them have written unsolicited "I love this" messages.
-- **Phase 5 done:** A user can complete the full "meeting → todo → expense" flow without leaving LifeOS.
-- **Phase 6 done:** LifeOS gets 10,000 signups in 30 days through organic + earned channels.
-- **Phase 7 done:** A new user can install LifeOS and, within five minutes, see their personal graph form — and never want to go back to a fragmented set of apps.
+- **Phase 3 done:** The team has used Sevri to capture their own meetings for four weeks and miss it when it's offline.
+- **Phase 4 done:** 100 strangers have used Sevri, and at least 10 of them have written unsolicited "I love this" messages.
+- **Phase 5 done:** A user can complete the full "meeting → todo → expense" flow without leaving Sevri.
+- **Phase 6 done:** Sevri gets 10,000 signups in 30 days through organic + earned channels.
+- **Phase 7 done:** A new user can install Sevri and, within five minutes, see their personal graph form — and never want to go back to a fragmented set of apps.
 
 ---
 

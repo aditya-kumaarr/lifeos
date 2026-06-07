@@ -1,8 +1,8 @@
-# LifeOS
+# Sevri
 
 > An operating system for your life. v1 starts as an AI-powered meeting-notes module that builds a personal knowledge graph from everything you say — and grows into the single app where your todos, expenses, notes, and memory all live.
 
-This is the working repository for the LifeOS product. It currently holds planning documents, the v1 spec, and an interactive build dashboard. Once we start building the app itself, the code will live alongside everything else in this same repo.
+This is the working repository for the Sevri product. It currently holds planning documents, the v1 spec, and an interactive build dashboard. Once we start building the app itself, the code will live alongside everything else in this same repo.
 
 ---
 
@@ -38,7 +38,7 @@ Open `dashboard/index.html` in your browser (Chrome/Edge recommended). The dashb
 Progress persists in your browser's localStorage. Good for trying it out, but resets if you switch machines or clear browser data.
 
 ### With GitHub sync (recommended for long-term)
-Click the **Sync settings** gear. Enter your GitHub username, the repo name (`lifeos` if you used the default), and a Personal Access Token (see below). Once connected:
+Click the **Sync settings** gear. Enter your GitHub username, the repo name (`sevri` if you used the default), and a Personal Access Token (see below). Once connected:
 
 - Every checkbox change is auto-saved to `state/dashboard-state.json` in this repo.
 - Open the dashboard on any machine, paste the same token, and your progress is right there.
@@ -46,7 +46,7 @@ Click the **Sync settings** gear. Enter your GitHub username, the repo name (`li
 
 ### Creating a GitHub PAT
 
-1. Go to **<https://github.com/settings/tokens/new?scopes=repo&description=LifeOS%20Dashboard>** — that link pre-fills the right scope (`repo`).
+1. Go to **<https://github.com/settings/tokens/new?scopes=repo&description=Sevri%20Dashboard>** — that link pre-fills the right scope (`repo`).
 2. Set an expiration that you're comfortable with (90 days minimum; 1 year is fine for personal use).
 3. Click **Generate token** and copy the value (starts with `ghp_…`).
 4. Paste it into the dashboard's Sync settings modal.
@@ -87,8 +87,9 @@ Build phasing lives in the Master Plan. Engineering kickoff is Week 4.
 - [x] Master plan drafted (May 2026)
 - [x] Interview guide drafted (May 2026)
 - [x] Build dashboard live with GitHub sync (May 2026)
+- [x] Name locked — **Sevri** (May 2026)
 - [ ] Phase 0 — De-risk (Week 1) starts Monday
-- [ ] Name + domain locked
+- [ ] `sevri.ai` domain purchased
 - [ ] 15 user interviews complete
 - [ ] Transcription quality validated
 - [ ] Go / pivot / kill decision made
