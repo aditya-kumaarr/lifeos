@@ -1,8 +1,10 @@
 # Sevri
 
-> An operating system for your life. v1 starts as an AI-powered meeting-notes module that builds a personal knowledge graph from everything you say — and grows into the single app where your todos, expenses, notes, and memory all live.
+> A personal knowledge brain whose primary input is your meetings. v1 captures and structures every conversation; the long-term ambition is one app where your todos, expenses, notes, meetings, and memory live in one connected graph.
 
 This is the working repository for the Sevri product. It currently holds planning documents, the v1 spec, and an interactive build dashboard. Once we start building the app itself, the code will live alongside everything else in this same repo.
+
+> **🤖 If you are a Claude Code agent (or another AI agent) picking up this project — read [`CLAUDE.md`](./CLAUDE.md) first.** It is the comprehensive handoff: project context, current state, all decisions, rejected paths, the plan, the dashboard system internals, credentials notes, the user's communication preferences, and exactly what to do next. Five-minute read; saves hours of context-rebuilding.
 
 ---
 
